@@ -1,0 +1,29 @@
+{
+    "name": "mongodb-uri",
+    "version": "0.9.7",
+    "description": "A parser and formatter for MongoDB URIs.",
+    "keywords": [ "mongodb", "uri", "url", "parser", "formatter", "mongoose" ],
+    "author": "MongoLab <support@mongolab.com>",
+    "contributors": [
+        "Jared D. Cottrell <jared@mongolab.com>"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/mongolab/mongodb-uri-node.git"
+    },
+    "homepage": "https://github.com/mongolab/mongodb-uri-node",
+    "license": "MIT",
+    "main": "mongodb-uri",
+    "devDependencies": {
+        "jake": "0.5.x",
+        "mocha": "1.9.x",
+        "should": "1.2.x",
+        "jake-mocha": "0.9.x"
+    },
+    "scripts": {
+        "test": "jake --trace"
+    },
+    "engines": {
+        "node": ">= 0.6.0"
+    }
+}
