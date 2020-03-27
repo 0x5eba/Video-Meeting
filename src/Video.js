@@ -1,19 +1,75 @@
 import React, { Component } from 'react';
-
 import io from 'socket.io-client'
 
-const server_url = "http://localhost:8080"
-
+const server_url = "http://localhost:3000"
 
 class Video extends Component {
   constructor(props) {
     super(props)
 
     this.localVideoref = React.createRef()
-    this.remoteVideoref = React.createRef()
+		this.remoteVideoref = React.createRef()
+		
+		this.localStream = null
 
     this.socket = null
-    this.candidates = []
+    this.socketId = null
+    this.connections = []
+    this.peerConnectionConfig = {
+      'iceServers': [
+        {'urls': 'stun:stun.services.mozilla.com'},
+        {'urls': 'stun:stun.l.google.com:19302'},
+      ]
+    }
+    this.constraints = {
+      video: true,
+      audio: false,
+    };
+  }
+
+  getUserMediaSuccess(stream) {
+		this.localStream = stream
+		// this.localVideoref.current.srcObject = stream
+    this.localVideoref.src = window.URL.createObjectURL(stream);
+  }
+
+  gotRemoteStream(event, id) {
+    var videos = document.querySelectorAll('video'),
+      video  = document.createElement('video'),
+      div    = document.createElement('div')
+
+    video.setAttribute('data-socket', id);
+    video.src         = window.URL.createObjectURL(event.stream);
+    video.autoplay    = true; 
+    // video.muted       = true;
+    video.playsinline = true;
+    
+    div.appendChild(video);      
+    videos.appendChild(div);      
+  }
+
+  gotMessageFromServer(fromId, message) {
+    //Parse the incoming signal
+    var signal = JSON.parse(message)
+
+    //Make sure it's not coming from yourself
+    if(fromId !== this.socketId) {
+			if(signal.sdp){            
+				this.connections[fromId].setRemoteDescription(new RTCSessionDescription(signal.sdp)).then(() => {                
+					if(signal.sdp.type === 'offer') {
+						this.connections[fromId].createAnswer().then((description) => {
+							this.connections[fromId].setLocalDescription(description).then(() => {
+								this.socket.emit('signal', fromId, JSON.stringify({'sdp': this.connections[fromId].localDescription}));
+							}).catch(e => console.log(e));
+						}).catch(e => console.log(e));
+					}
+				}).catch(e => console.log(e));
+			}
+
+			if(signal.ice) {
+				this.connections[fromId].addIceCandidate(new RTCIceCandidate(signal.ice)).catch(e => console.log(e));
+			}                
+    }
   }
 
   componentDidMount = () => {
@@ -37,134 +93,61 @@ class Video extends Component {
 		// 	console.error('Error:', error)
 		// })
 
-    this.socket = io(
-      '/webrtcPeer',
-      {
-        path: server_url + '/webrtc',
-        query: {}
-      }
-    )
+    if(navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia(this.constraints)
+        .then(this.getUserMediaSuccess)
+        .then(() => {
 
-    this.socket.on('connection-success', success => {
-      console.log(success)
-    })
+          this.socket = io.connect(server_url, {secure: true});
+          this.socket.on('signal', this.gotMessageFromServer);    
 
-    this.socket.on('offerOrAnswer', (sdp) => {
-      this.textref.value = JSON.stringify(sdp)
+          this.socket.on('connect', () => {
 
-      // set sdp as remote description
-      this.pc.setRemoteDescription(new RTCSessionDescription(sdp))
-    })
+            this.socketId = this.socket.id;
+            this.socket.on('user-left', function(id){
+              var video = document.querySelector(`[data-socket="${id}"]`);
+              var parentDiv = video.parentElement;
+              video.parentElement.parentElement.removeChild(parentDiv);
+            });
 
-    this.socket.on('candidate', (candidate) => {
-      // console.log('From Peer... ', JSON.stringify(candidate))
-      // this.candidates = [...this.candidates, candidate]
-      this.pc.addIceCandidate(new RTCIceCandidate(candidate))
-    })
+            this.socket.on('user-joined', function(id, count, clients){
+              clients.forEach(function(socketListId) {
+                if(!this.connections[socketListId]){
+                  this.connections[socketListId] = new RTCPeerConnection(this.peerConnectionConfig);
+                  //Wait for their ice candidate       
+                  this.connections[socketListId].onicecandidate = function(event){
+                    if(event.candidate != null) {
+                      console.log('SENDING ICE');
+                      this.socket.emit('signal', socketListId, JSON.stringify({'ice': event.candidate}));
+                    }
+                  }
 
-    const pc_config = {
-      "iceServers": [
-        // {
-        //   urls: 'stun:[STUN_IP]:[PORT]',
-        //   'credentials': '[YOR CREDENTIALS]',
-        //   'username': '[USERNAME]'
-        // },
-        { urls: 'stun:stun.services.mozilla.com'},
-        { urls: 'stun:stun.l.google.com:19302' }
-      ]
-    }
+                  //Wait for their video stream
+                  this.connections[socketListId].onaddstream = function(event){
+                    this.gotRemoteStream(event, socketListId)
+                  }    
 
-    // https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection
-    // create an instance of RTCPeerConnection
-    this.pc = new RTCPeerConnection(pc_config)
+                  //Add the local video stream
+                  this.connections[socketListId].addStream(this.localStream);                                                                
+                }
+              });
 
-    // triggered when a new candidate is returned
-    this.pc.onicecandidate = (e) => {
-      // send the candidates to the remote peer
-      // see addCandidate below to be triggered on the remote peer
-      if (e.candidate) {
-        // console.log(JSON.stringify(e.candidate))
-        this.sendToPeer('candidate', e.candidate)
-      }
-    }
-
-    // triggered when there is a change in connection state
-    this.pc.oniceconnectionstatechange = (e) => {
-      console.log(e)
-    }
-
-    // triggered when a stream is added to pc, see below - this.pc.addStream(stream)
-    this.pc.onaddstream = (e) => {
-      this.remoteVideoref.current.srcObject = e.stream
-    }
-
-    // called when getUserMedia() successfully returns - see below
-    // getUserMedia() returns a MediaStream object (https://developer.mozilla.org/en-US/docs/Web/API/MediaStream)
-    const success = (stream) => {
-      window.localStream = stream
-      this.localVideoref.current.srcObject = stream
-      this.pc.addStream(stream)
-    }
-
-    // https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
-    // see the above link for more constraint options
-    const constraints = {
-      audio: true,
-      video: true,
-      // video: {
-      //   width: 1280,
-      //   height: 720
-      // },
-      // video: {
-      //   width: { min: 1280 },
-      // }
-    }
-
-    navigator.mediaDevices.getUserMedia(constraints)
-      .then(success)
-      .catch((e) => {
-        console.log('getUserMedia Error: ', e)
-      })
-  }
-
-  sendToPeer = (messageType, payload) => {
-    this.socket.emit(messageType, {
-      socketID: this.socket.id,
-      payload
-    })
-  }
-
-  /* ACTION METHODS FROM THE BUTTONS ON SCREEN */
-
-  createOffer = () => {
-    console.log('Offer')
-
-    // https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/createOffer
-    // initiates the creation of SDP
-    this.pc.createOffer({ offerToReceiveVideo: 1, offerToReceiveAudio: 1 })
-      .then(sdp => {
-        // console.log(JSON.stringify(sdp))
-
-        // set offer sdp as local description
-        this.pc.setLocalDescription(sdp)
-
-        this.sendToPeer('offerOrAnswer', sdp)
-    })
-  }
-
-  // https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/createAnswer
-  // creates an SDP answer to an offer received from remote peer
-  createAnswer = () => {
-    console.log('Answer')
-    this.pc.createAnswer({ offerToReceiveVideo: 1, offerToReceiveAudio: 1 })
-      .then(sdp => {
-        // console.log(JSON.stringify(sdp))
-
-        // set answer sdp as local description
-        this.pc.setLocalDescription(sdp)
-
-        this.sendToPeer('offerOrAnswer', sdp)
-    })
+              //Create an offer to connect with your local description
+              
+              if(count >= 2){
+                this.connections[id].createOffer().then((description) => {
+                  this.connections[id].setLocalDescription(description)
+                    .then(() => {
+                        // console.log(this.connections);
+                        this.socket.emit('signal', id, JSON.stringify({'sdp': this.connections[id].localDescription}));
+                    })
+                    .catch(e => console.log(e));        
+                });
+              }
+            });
+          })       
+        }); 
+		}
   }
 
   render() {
@@ -180,7 +163,7 @@ class Video extends Component {
           ref={ this.localVideoref }
           autoPlay>
         </video>
-        <video
+        {/* <video
           style={{
             width: 240,
             height: 240,
@@ -189,14 +172,7 @@ class Video extends Component {
           }}
           ref={ this.remoteVideoref }
           autoPlay>
-        </video>
-        <br />
-
-        <button onClick={this.createOffer}>Offer</button>
-        <button onClick={this.createAnswer}>Answer</button>
-
-        <br />
-        <textarea style={{ width: 450, height:40 }} ref={ref => { this.textref = ref }} />
+        </video> */}
       </div>
     )
   }
