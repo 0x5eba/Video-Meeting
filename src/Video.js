@@ -22,7 +22,7 @@ class Video extends Component {
     this.socketId = null
     this.constraints = {
       video: true,
-      audio: false,
+      audio: true,
     };
 
     this.path = window.location.href
@@ -95,19 +95,19 @@ class Video extends Component {
             this.socketId = socket.id;
             socket.on('user-left', function(id){
               var video = document.querySelector(`[data-socket="${id}"]`);
-              var parentDiv = video.parentElement;
-              video.parentElement.parentElement.removeChild(parentDiv);
+              if(video !== null){
+                var parentDiv = video.parentElement;
+                video.parentElement.parentElement.removeChild(parentDiv);
+              }
             });
 
             socket.on('user-joined', function(id, clients){
-              console.log(clients)
               clients.forEach(function(socketListId) {
                 if(connections[socketListId] === undefined){
                   connections[socketListId] = new RTCPeerConnection(peerConnectionConfig);
                   //Wait for their ice candidate       
                   connections[socketListId].onicecandidate = function(event){
                     if(event.candidate != null) {
-                      console.log('SENDING ICE');
                       socket.emit('signal', socketListId, JSON.stringify({'ice': event.candidate}));
                     }
                   }
@@ -133,7 +133,6 @@ class Video extends Component {
 
               //Create an offer to connect with your local description
               
-              console.log(connections, id)
               connections[id].createOffer().then((description) => {
                 connections[id].setLocalDescription(description)
                   .then(() => {
@@ -151,29 +150,10 @@ class Video extends Component {
   render() {
     return (
       <div>
-        <video
-          style={{
-            width: 240,
-            height: 240,
-            margin: 5,
-            backgroundColor: 'black'
-          }}
-          ref={ this.localVideoref }
-          autoPlay>
-        </video>
+        <video ref={ this.localVideoref } autoPlay></video>
         <div id="div-videos">
 
         </div>
-        {/* <video
-          style={{
-            width: 240,
-            height: 240,
-            margin: 5,
-            backgroundColor: 'black'
-          }}
-          ref={ this.remoteVideoref }
-          autoPlay>
-        </video> */}
       </div>
     )
   }
