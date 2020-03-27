@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './Home.css';
-import { Input, Button, Icon } from '@material-ui/core';
+import { Input, Button } from '@material-ui/core';
 
 const api_url = "http://localhost:3001"
 

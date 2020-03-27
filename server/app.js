@@ -51,12 +51,11 @@ io.on('connection', function(socket){
 		if(connections[path] === undefined){
 			connections[path] = []
 		}
+		connections[path].push(socket.id);
 
 		for(let a = 0; a < connections[path].length; ++a){
-			io.to(connections[path][a]).emit("user-joined", socket.id, connections[path].length, connections[path]);
+			io.to(connections[path][a]).emit("user-joined", socket.id, connections[path]);
 		}
-
-		connections[path].push(socket.id);
 	});
 
 	socket.on('signal', (toId, message) => {
@@ -69,20 +68,24 @@ io.on('connection', function(socket){
 
 	socket.on('disconnect', function() {
 		var key;
+		var ok = false
 		for (const [k, v] of Object.entries(connections)) {
 			for(let a = 0; a < v.length; ++a){
 				if(v[a] === socket.id){
 					key = k
+					ok = true
 				}
 			}
 		}
-		
-		for(let a = 0; a < connections[key].length; ++a){
-			io.to(connections[key][a]).emit("user-left", socket.id);
-		}
 
-		var index = connections[key].indexOf(socket.id);
-		connections[key].splice(index, 1);
+		if(ok === true){
+			for(let a = 0; a < connections[key].length; ++a){
+				io.to(connections[key][a]).emit("user-left", socket.id);
+			}
+	
+			var index = connections[key].indexOf(socket.id);
+			connections[key].splice(index, 1);
+		}
 	})
 });
 
