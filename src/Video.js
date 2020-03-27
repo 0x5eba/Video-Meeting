@@ -27,6 +27,7 @@ class Video extends Component {
 
     this.path = window.location.href
     
+    this.videos = []
   }
 
   getUserMediaSuccess = (stream) => {
@@ -113,18 +114,16 @@ class Video extends Component {
 
                   //Wait for their video stream
                   connections[socketListId].onaddstream = function(event){
-                    // var videos = document.getElementById('main'),
-                    //   video  = document.createElement('video'),
-                    //   div    = document.createElement('div')
+                    var videos = document.getElementById('div-videos'),
+                      video = document.createElement('video')
 
-                    // video.setAttribute('data-socket', socketListId);
-                    // video.current.srcObject = event.stream
-                    // video.autoplay    = true; 
-                    // // video.muted       = true;
-                    // video.playsinline = true;
+                    video.setAttribute('data-socket', socketListId);
+                    video.srcObject = event.stream
+                    video.autoplay = true; 
+                    // video.muted       = true;
+                    video.playsinline = true;
                     
-                    // div.appendChild(video);      
-                    // videos.appendChild(div);
+                    videos.appendChild(video);
                   }    
 
                   //Add the local video stream
@@ -151,7 +150,7 @@ class Video extends Component {
 
   render() {
     return (
-      <div id="main">
+      <div>
         <video
           style={{
             width: 240,
@@ -162,6 +161,9 @@ class Video extends Component {
           ref={ this.localVideoref }
           autoPlay>
         </video>
+        <div id="div-videos">
+
+        </div>
         {/* <video
           style={{
             width: 240,
