@@ -48,14 +48,15 @@ connections = {}
 io.on('connection', function(socket){
 
 	socket.on('join-call', (path) => {
-		if(connections.path === undefined){
+		if(connections[path] === undefined){
 			connections[path] = []
 		}
-		connections[path].push(socket.id);
 
 		for(let a = 0; a < connections[path].length; ++a){
 			io.to(connections[path][a]).emit("user-joined", socket.id, connections[path].length, connections[path]);
 		}
+
+		connections[path].push(socket.id);
 	});
 
 	socket.on('signal', (toId, message) => {
@@ -75,13 +76,13 @@ io.on('connection', function(socket){
 				}
 			}
 		}
-
+		
 		for(let a = 0; a < connections[key].length; ++a){
 			io.to(connections[key][a]).emit("user-left", socket.id);
 		}
 
 		var index = connections[key].indexOf(socket.id);
-		connections[k].splice(index, 1);
+		connections[key].splice(index, 1);
 	})
 });
 

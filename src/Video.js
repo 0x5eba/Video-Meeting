@@ -8,10 +8,8 @@ class Video extends Component {
     super(props)
 
     this.localVideoref = React.createRef()
-		this.remoteVideoref = React.createRef()
+		// this.remoteVideoref = React.createRef()
 		
-		this.localStream = null
-
     this.socket = null
     this.socketId = null
     this.connections = []
@@ -25,15 +23,16 @@ class Video extends Component {
       video: true,
       audio: false,
     };
+
+    this.path = window.location.href
   }
 
-  getUserMediaSuccess(stream) {
-		this.localStream = stream
-		// this.localVideoref.current.srcObject = stream
-    this.localVideoref.src = window.URL.createObjectURL(stream);
+  getUserMediaSuccess = (stream) => {
+    window.localStream = stream
+		this.localVideoref.current.srcObject = stream
   }
 
-  gotRemoteStream(event, id) {
+  gotRemoteStream = (event, id) => {
     var videos = document.querySelectorAll('video'),
       video  = document.createElement('video'),
       div    = document.createElement('div')
@@ -48,7 +47,7 @@ class Video extends Component {
     videos.appendChild(div);      
   }
 
-  gotMessageFromServer(fromId, message) {
+  gotMessageFromServer = (fromId, message) => {
     //Parse the incoming signal
     var signal = JSON.parse(message)
 
@@ -103,6 +102,8 @@ class Video extends Component {
 
           this.socket.on('connect', () => {
 
+            this.socket.emit('join-call', this.path);
+
             this.socketId = this.socket.id;
             this.socket.on('user-left', function(id){
               var video = document.querySelector(`[data-socket="${id}"]`);
@@ -111,8 +112,10 @@ class Video extends Component {
             });
 
             this.socket.on('user-joined', function(id, count, clients){
+              console.log("AAAAAAAA")
               clients.forEach(function(socketListId) {
                 if(!this.connections[socketListId]){
+                  console.log("NEWWW")
                   this.connections[socketListId] = new RTCPeerConnection(this.peerConnectionConfig);
                   //Wait for their ice candidate       
                   this.connections[socketListId].onicecandidate = function(event){
@@ -128,7 +131,7 @@ class Video extends Component {
                   }    
 
                   //Add the local video stream
-                  this.connections[socketListId].addStream(this.localStream);                                                                
+                  this.connections[socketListId].addStream(window.localStream);                                                                
                 }
               });
 
