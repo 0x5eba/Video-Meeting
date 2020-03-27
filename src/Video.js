@@ -2,11 +2,13 @@ import React, { Component } from 'react';
 
 import io from 'socket.io-client'
 
+const server_url = "http://localhost:8080"
+
+
 class Video extends Component {
   constructor(props) {
     super(props)
 
-    // https://reactjs.org/docs/refs-and-the-dom.html
     this.localVideoref = React.createRef()
     this.remoteVideoref = React.createRef()
 
@@ -16,10 +18,29 @@ class Video extends Component {
 
   componentDidMount = () => {
 
+    // const data = { 
+		// 	// inviteLink: 
+		// }
+		// fetch(api_url + '/api/call/create', {
+		// 	method: 'POST',
+		// 	headers: {
+		// 		'Content-Type': 'application/json',
+		// 	},
+		// 	body: JSON.stringify(data),
+		// })
+		// .then((data) => {
+		// 	console.log('Success:', data)
+		// 	// let history = useHistory();
+		// 	// history.push('/' + data.url)
+		// })
+		// .catch((error) => {
+		// 	console.error('Error:', error)
+		// })
+
     this.socket = io(
       '/webrtcPeer',
       {
-        path: '/webrtc',
+        path: server_url + '/webrtc',
         query: {}
       }
     )
@@ -48,9 +69,8 @@ class Video extends Component {
         //   'credentials': '[YOR CREDENTIALS]',
         //   'username': '[USERNAME]'
         // },
-        {
-          urls : 'stun:stun.l.google.com:19302'
-        }
+        { urls: 'stun:stun.services.mozilla.com'},
+        { urls: 'stun:stun.l.google.com:19302' }
       ]
     }
 

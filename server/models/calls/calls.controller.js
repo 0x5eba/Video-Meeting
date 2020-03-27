@@ -5,35 +5,31 @@ exports.createCall = (req, res, next) => {
     if(req.body.url === undefined){
         res.status(403).send({ err: "Error creating call, missing url" })
     } else {
-        CallsModel.createCall(req.body)
+        CallsModel.createCall(req.body.url)
             .then((result) => {
-                res.status(200).send(result);
+                res.status(200).send(result)
             })
-            .catch(err => {
+            .catch((err) => {
                 res.status(403).send({ err: "Error creating call" })
             })
     }
 }
 
 exports.uniqueUrl = (req, res, next) => {
-    if(req.body.inviteLink === undefined) {
-        res.status(403).send({ err: "Error creating call, missing invite link" })
-    } else {
-        while(true){
-            let url = crypto.randomBytes(5).toString('base64');
-            CallsModel.findByUrl(url)
-                .then((exist) => {
-                    if (exist === undefined || exist === null) {
-                        req.body = {
-                            url: url,
-                            inviteLink: req.body.inviteLink
-                        }
-                        return next();
-                    }
-                })
-                .catch(err => {})
-        }
+    let url = req.body.url
+    if(url === undefined || url.length === 0){
+        url = crypto.randomBytes(5).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/\=/g, '');
     }
+    CallsModel.findByUrl(url)
+        .then((exist) => {
+            if (exist === undefined || exist === null) {
+                req.body = {
+                    url: url,
+                }
+                return next();
+            }
+        })
+        .catch(err => {})
 }
 
 exports.listCalls = (req, res) => {

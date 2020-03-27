@@ -4,8 +4,8 @@ mongoose.set('useCreateIndex', true);
 var SchemaTypes = mongoose.Schema.Types;
 
 const CallsModel = new mongoose.Schema({
-    url: { type: String, trim: true, require: true, minlength: 5 },
-    inviteLink: { type: String, require: true }, // sdp
+    url: { type: String, trim: true, require: true },
+    inviteLink: { type: String, default: "" }, // sdp
     // lastSeen: { type: Number, default: 0 },
 })
 
@@ -21,9 +21,9 @@ exports.findByUrl = (url) => {
     })
 };
 
-exports.createCall = (data) => {
+exports.createCall = (url) => {
     return new Promise((resolve, reject) => {
-        const call = new Call(data);
+        const call = new Calls({ url: url });
         call.save(function (err, newdata) {
             if (err) return reject(err);
             resolve(newdata);

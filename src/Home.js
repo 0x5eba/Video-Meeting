@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import './Home.css';
 import { Input, Button, Icon } from '@material-ui/core';
-import { useHistory } from "react-router-dom";
 
 const api_url = "http://localhost:3001"
 
@@ -54,7 +53,7 @@ class Home extends Component {
 
 	create = () => {
 		const data = { 
-			// inviteLink: 
+			url: this.state.url
 		}
 		fetch(api_url + '/api/call/create', {
 			method: 'POST',
@@ -63,10 +62,10 @@ class Home extends Component {
 			},
 			body: JSON.stringify(data),
 		})
-		.then((data) => {
-			console.log('Success:', data.json())
-			let history = useHistory();
-			history.push('/')
+		.then(data => data.json())
+		.then(data => {
+			let url = data.url
+			window.location.href = `/${url}`
 		})
 		.catch((error) => {
 			console.error('Error:', error)
@@ -78,14 +77,12 @@ class Home extends Component {
       <div className="flex-container">
 				<div className="row">
 					<div className="flex-item" style={{marginTop: "-30%"}}>
-						<Input placeholder="URL" style={{ margin: "20px" }} 
-							onChange={e => this.handleChange(e)}/>
-						<Button variant="contained" color="primary" onClick={this.join}>
-							Join call</Button>
+						<Input placeholder="URL" onChange={e => this.handleChange(e)}/>
 					</div>
 					<div className="flex-item">
-					{/* <Link to='/somewhere'> */}
-						<Button variant="contained" style={{backgroundColor: "#4caf50"}}
+						<Button variant="contained" color="primary" onClick={this.join} style={{margin: "20px"}}>
+							Join call</Button>
+						<Button variant="contained" style={{backgroundColor: "#4caf50", margin: "20px"}}
 							onClick={this.create}>
 							Create call</Button>
 					</div>
