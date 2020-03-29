@@ -5,7 +5,7 @@ var SchemaTypes = mongoose.Schema.Types;
 
 const CallsModel = new mongoose.Schema({
     url: { type: String, trim: true, require: true },
-    inviteLink: { type: String, default: "" }, // sdp
+    // inviteLink: { type: String, default: "" }, // sdp
     // lastSeen: { type: Number, default: 0 },
 })
 

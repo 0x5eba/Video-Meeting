@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import io from 'socket.io-client'
+import { Button } from '@material-ui/core';
 
 const server_url = "http://localhost:3000"
 
@@ -17,7 +18,6 @@ class Video extends Component {
     super(props)
 
     this.localVideoref = React.createRef()
-		// this.remoteVideoref = React.createRef()
 		
     this.socketId = null
     this.constraints = {
@@ -26,8 +26,6 @@ class Video extends Component {
     };
 
     this.path = window.location.href
-    
-    this.videos = []
   }
 
   getUserMediaSuccess = (stream) => {
@@ -60,26 +58,6 @@ class Video extends Component {
   }
 
   componentDidMount = () => {
-
-    // const data = { 
-		// 	// inviteLink: 
-		// }
-		// fetch(api_url + '/api/call/create', {
-		// 	method: 'POST',
-		// 	headers: {
-		// 		'Content-Type': 'application/json',
-		// 	},
-		// 	body: JSON.stringify(data),
-		// })
-		// .then((data) => {
-		// 	console.log('Success:', data)
-		// 	// let history = useHistory();
-		// 	// history.push('/' + data.url)
-		// })
-		// .catch((error) => {
-		// 	console.error('Error:', error)
-		// })
-
     if(navigator.mediaDevices.getUserMedia) {
       navigator.mediaDevices.getUserMedia(this.constraints)
         .then(this.getUserMediaSuccess)
@@ -132,7 +110,6 @@ class Video extends Component {
               });
 
               //Create an offer to connect with your local description
-              
               connections[id].createOffer().then((description) => {
                 connections[id].setLocalDescription(description)
                   .then(() => {
@@ -147,9 +124,23 @@ class Video extends Component {
 		}
   }
 
+  shareScreen = () => {
+    var constraints = {
+      video: true
+    }
+    
+    if (navigator.mediaDevices.getDisplayMedia) {
+      navigator.mediaDevices.getDisplayMedia(constraints)
+        .then(this.getUserMediaSuccess)
+        // .then(() => {})
+        .catch((e) => console.log(e))
+    }
+  }
+
   render() {
     return (
       <div>
+        <Button onClick={ this.shareScreen }>Share Screen</Button>
         <video ref={ this.localVideoref } autoPlay></video>
         <div id="div-videos">
 

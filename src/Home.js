@@ -22,8 +22,10 @@ class Home extends Component {
 	  fetch(api_url + '/api/call/' + this.state.url, {
 			method: 'GET',
 		})
-		.then((data) => {
-			console.log('Success:', data)
+		.then(data => data.json())
+		.then(data => {
+			let url = data.url
+			window.location.href = `/${url}`
 		})
 		.catch((error) => {
 			console.error('Error:', error)
