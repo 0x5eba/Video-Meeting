@@ -24,13 +24,28 @@ class Video extends Component {
       video: true,
       audio: true,
     };
+    this.shareVideo = false
+    this.shareScreen = false
 
     this.path = window.location.href
   }
 
   getUserMediaSuccess = (stream) => {
     window.localStream = stream
-		this.localVideoref.current.srcObject = stream
+    this.localVideoref.current.srcObject = stream
+    
+    stream.getVideoTracks()[0].onended = () => {
+      if(this.shareScreen === true){
+        if(navigator.mediaDevices.getUserMedia) {
+          this.shareScreen = false
+          navigator.mediaDevices.getUserMedia(this.constraints)
+            .then(this.getUserMediaSuccess)
+            .catch((e) => console.log(e))
+        }
+      } else if(this.shareVideo === true){
+        
+      }
+    };
   }
 
   gotMessageFromServer = (fromId, message) => {
@@ -124,12 +139,13 @@ class Video extends Component {
 		}
   }
 
-  shareScreen = () => {
+  startCapture = () => {
     var constraints = {
       video: true
     }
     
     if (navigator.mediaDevices.getDisplayMedia) {
+      this.shareScreen = true
       navigator.mediaDevices.getDisplayMedia(constraints)
         .then(this.getUserMediaSuccess)
         // .then(() => {})
@@ -137,10 +153,47 @@ class Video extends Component {
     }
   }
 
+  stopCapture = (evt) => {
+    if(this.shareScreen === true){
+      let tracks = this.localVideoref.current.srcObject.getTracks()
+      tracks.forEach(track => track.stop())
+      this.localVideoref.current.srcObject = null;
+      this.shareScreen = false
+    }
+  }
+
+  startVideo = (video, audio) => {
+    var constraints = {
+      video: video,
+      audio: audio,
+    }
+    
+    if (navigator.mediaDevices.getDisplayMedia) {
+      this.shareScreen = true
+      navigator.mediaDevices.getDisplayMedia(constraints)
+        .then(this.getUserMediaSuccess)
+        // .then(() => {})
+        .catch((e) => console.log(e))
+    }
+  }
+
+  stopVideo = (evt) => {
+    if(this.shareScreen === false){
+      let tracks = this.localVideoref.current.srcObject.getTracks()
+      tracks.forEach(track => track.stop())
+      this.localVideoref.current.srcObject = null;
+      this.shareScreen = false
+    }
+  }
+
   render() {
     return (
       <div>
-        <Button onClick={ this.shareScreen }>Share Screen</Button>
+        <Button onClick={ this.startCapture }>Start Capture</Button>
+        <Button onClick={ this.stopCapture }>Stop Capture</Button>
+
+        <Button onClick={ this.startVideo }>Start Video</Button>
+        <Button onClick={ this.stopVideo }>Stop Video</Button>
         <video ref={ this.localVideoref } autoPlay></video>
         <div id="div-videos">
 
