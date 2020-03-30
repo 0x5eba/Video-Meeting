@@ -24,34 +24,15 @@ class Home extends Component {
 		})
 		.then(data => data.json())
 		.then(data => {
-			let url = data.url
-			window.location.href = `/${url}`
+			if(data.err === undefined){
+				let url = data.url
+				window.location.href = `/${url}`
+			}
 		})
 		.catch((error) => {
 			console.error('Error:', error)
 		})
 	}
-
-	// create = async () => {
-	// 	const data = { 
-	// 		// inviteLink: 
-	// 	}
-	// 	await fetch(api_url + '/api/call/create', {
-	// 		method: 'POST',
-	// 		headers: {
-	// 			'Content-Type': 'application/json',
-	// 		},
-	// 		body: JSON.stringify(data),
-	// 	})
-	// 	.then((data) => {
-	// 		console.log('Success:', data.json())
-	// 		let history = useHistory();
-	// 		history.push('/')
-	// 	})
-	// 	.catch((error) => {
-	// 		console.error('Error:', error)
-	// 	})
-	// }
 
 	create = () => {
 		const data = { 

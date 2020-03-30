@@ -45,7 +45,11 @@ exports.listCalls = (req, res) => {
 exports.getByUrl = (req, res) => {
     CallsModel.findByUrl(req.params.url)
         .then((result) => {
-            res.status(200).send(result);
+            if(result !== null){
+                res.status(200).send(result);
+            } else {
+                res.status(403).send({ err: "Error get call" })
+            }
         })
         .catch(err => {
             res.status(403).send({ err: "Error get call" })
