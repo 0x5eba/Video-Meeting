@@ -55,6 +55,8 @@ class Video extends Component {
     this.path = window.location.href
 
     this.getMedia()
+
+    this.connectToSocketServer()
   }
 
   async getMedia() {
@@ -69,16 +71,28 @@ class Video extends Component {
         this.audioAvailable = false
       })
 
-    this.connectToSocketServer()
+    if(navigator.mediaDevices.getDisplayMedia){
+      this.screenAvailable = true
+    } else {
+      this.screenAvailable = false
+    }
   }
 
 
   getUserMedia = () => {
     console.log(this.state, this.videoAvailable, this.audioAvailable)
-    if(this.videoAvailable || this.audioAvailable) {
+    if((this.videoAvailable || this.audioAvailable) && (this.state.video || this.state.audio)) {
       navigator.mediaDevices.getUserMedia({video: this.videoAvailable && this.state.video, audio: this.audioAvailable && this.state.audio})
         .then(this.getUserMediaSuccess)
         .catch((e) => console.log(e))
+    } else {
+      try {
+        let tracks = this.localVideoref.current.srcObject.getTracks()
+        tracks.forEach(track => track.stop())
+        this.localVideoref.current.srcObject = null;
+      } catch(e){
+        console.log(e)
+      }
     }
   }
 
@@ -87,27 +101,29 @@ class Video extends Component {
     this.localVideoref.current.srcObject = stream
     
     stream.getVideoTracks()[0].onended = () => {
+      console.log("video / audio false")
       this.setState({ 
         video: false,
         audio: false,
         screen: this.state.screen
+      }, () => {
+        let tracks = this.localVideoref.current.srcObject.getTracks()
+        tracks.forEach(track => track.stop())
+        this.localVideoref.current.srcObject = null;
+
+        this.getDislayMedia()
       })
-
-      let tracks = this.localVideoref.current.srcObject.getTracks()
-      tracks.forEach(track => track.stop())
-      this.localVideoref.current.srcObject = null;
-
-      this.getDislayMedia()
     };
   }
 
 
   getDislayMedia = () => {
-    console.log(this.screenAvailable, this.state.screen)
-    if (this.screenAvailable && this.state.screen) {
-      navigator.mediaDevices.getDisplayMedia({video: this.state.screen})
-        .then(this.getDislayMediaSuccess)
-        .catch((e) => console.log(e))
+    if (this.state.screen) {
+      if(navigator.mediaDevices.getDisplayMedia){
+        navigator.mediaDevices.getDisplayMedia({video: this.state.screen})
+          .then(this.getDislayMediaSuccess)
+          .catch((e) => console.log(e))
+      }
     }
   }
 
@@ -116,17 +132,18 @@ class Video extends Component {
     this.localVideoref.current.srcObject = stream
     
     stream.getVideoTracks()[0].onended = () => {
+      console.log("screen false")
       this.setState({ 
         video: this.state.video,
         audio: this.state.audio,
         screen: false,
+      }, () => {
+        let tracks = this.localVideoref.current.srcObject.getTracks()
+        tracks.forEach(track => track.stop())
+        this.localVideoref.current.srcObject = null;
+
+        this.getUserMedia()
       })
-
-      let tracks = this.localVideoref.current.srcObject.getTracks()
-      tracks.forEach(track => track.stop())
-      this.localVideoref.current.srcObject = null;
-
-      this.getUserMedia()
     };
   }
 
@@ -250,9 +267,10 @@ class Video extends Component {
     this.setState({ 
       video: this.state.video,
       audio: this.state.audio,
-      screen: !this.state.screen,
+      screen: !this.state.screen
+    }, () => {
+      this.getDislayMedia()
     })
-    this.getDislayMedia()
   }
 
   handleEndCall = () => {
