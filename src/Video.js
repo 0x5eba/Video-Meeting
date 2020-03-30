@@ -36,8 +36,6 @@ class Video extends Component {
     this.audioAvailable = false
     this.screenAvailable = false
 
-    this.checkMedia()
-    
     this.video = false
     if(this.videoAvailable){
       this.video = true
@@ -56,45 +54,27 @@ class Video extends Component {
 
     this.path = window.location.href
 
-    this.getUserMedia()
+    this.getMedia()
+  }
+
+  async getMedia() {
+    await navigator.mediaDevices.getUserMedia({video: true, audio: true})
+      .then((stream) => {
+        this.videoAvailable = true
+        this.audioAvailable = true
+      })
+      .catch((e) => {
+        console.log(e)
+        this.videoAvailable = false
+        this.audioAvailable = false
+      })
 
     this.connectToSocketServer()
   }
 
-  checkMedia = () => {
-    if (navigator.mediaDevices.getUserMedia) {
-      navigator.mediaDevices.getUserMedia({video: true})
-        .then((stream) => {
-          this.videoAvailable = true
-        })
-        .catch((e) => {
-          console.log(e)
-          this.videoAvailable = false
-        })
-
-      navigator.mediaDevices.getUserMedia({audio: true})
-        .then((stream) => {
-          this.audioAvailable = true
-        })
-        .catch((e) => {
-          console.log(e)
-          this.audioAvailable = false
-        })
-    } else {
-      this.videoAvailable = false
-      this.audioAvailable = false
-    }
-
-    if (navigator.mediaDevices.getDisplayMedia) {
-      this.screenAvailable = true
-    } else {
-      this.screenAvailable = false
-    }
-  }
-
 
   getUserMedia = () => {
-    this.checkMedia()
+    console.log(this.state, this.videoAvailable, this.audioAvailable)
     if(this.videoAvailable || this.audioAvailable) {
       navigator.mediaDevices.getUserMedia({video: this.videoAvailable && this.state.video, audio: this.audioAvailable && this.state.audio})
         .then(this.getUserMediaSuccess)
@@ -123,7 +103,6 @@ class Video extends Component {
 
 
   getDislayMedia = () => {
-    this.checkMedia()
     console.log(this.screenAvailable, this.state.screen)
     if (this.screenAvailable && this.state.screen) {
       navigator.mediaDevices.getDisplayMedia({video: this.state.screen})
@@ -252,8 +231,9 @@ class Video extends Component {
       video: !this.state.video,
       audio: this.state.audio,
       screen: this.state.screen
+    }, () => {
+      this.getUserMedia()
     })
-    this.getUserMedia()
   }
 
   handleAudio = () => {
@@ -261,8 +241,9 @@ class Video extends Component {
       video: this.state.video,
       audio: !this.state.audio,
       screen: this.state.screen
+    }, () => {
+      this.getUserMedia()
     })
-    this.getUserMedia()
   }
 
   handleScreen = () => {
