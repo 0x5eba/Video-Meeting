@@ -23,15 +23,16 @@ const peerConnectionConfig = {
   ]
 }
 var socket = null
+var socketId = null
 
 class Video extends Component {
   constructor(props) {
     super(props)
 
     this.localVideoref = React.createRef()
-		
-    this.socketId = null
 
+    this.path = window.location.href
+		
     this.videoAvailable = false
     this.audioAvailable = false
     this.screenAvailable = false
@@ -47,16 +48,20 @@ class Video extends Component {
     this.screen = false
 
     this.state = {
+      video: false,
+      audio: false,
+      screen: false,
+    }
+  }
+
+  UNSAFE_componentWillMount = () => {
+    this.setState({ 
       video: this.video,
       audio: this.audio,
       screen: this.screen
-    }
-
-    this.path = window.location.href
-
-    this.getMedia()
-
-    this.connectToSocketServer()
+    }, () => {
+      this.getUserMedia()
+    })
   }
 
   async getMedia() {
@@ -80,20 +85,34 @@ class Video extends Component {
 
 
   getUserMedia = () => {
-    console.log(this.state, this.videoAvailable, this.audioAvailable)
-    if((this.videoAvailable || this.audioAvailable) && (this.state.video || this.state.audio)) {
-      navigator.mediaDevices.getUserMedia({video: this.videoAvailable && this.state.video, audio: this.audioAvailable && this.state.audio})
-        .then(this.getUserMediaSuccess)
-        .catch((e) => console.log(e))
-    } else {
-      try {
-        let tracks = this.localVideoref.current.srcObject.getTracks()
-        tracks.forEach(track => track.stop())
-        this.localVideoref.current.srcObject = null;
-      } catch(e){
-        console.log(e)
+    console.log(this.state)
+    if(this.state.video) {
+      if(socket !== null){
+        socket.disconnect()
       }
+      navigator.mediaDevices.getUserMedia({video: true})
+        .then(this.getUserMediaSuccess)
+        .then((stream) => {
+          document.getElementById('div-videos').innerHTML = ""
+          this.connectToSocketServer()
+        })
+        .catch((e) => console.log(e))
     }
+    
+    // console.log(this.state, this.videoAvailable, this.audioAvailable)
+    // if((this.videoAvailable || this.audioAvailable) && (this.state.video || this.state.audio)) {
+    //   navigator.mediaDevices.getUserMedia({video: this.videoAvailable && this.state.video, audio: this.audioAvailable && this.state.audio})
+    //     .then(this.getUserMediaSuccess)
+    //     .catch((e) => console.log(e))
+    // } else {
+    //   try {
+    //     let tracks = this.localVideoref.current.srcObject.getTracks()
+    //     tracks.forEach(track => track.stop())
+    //     this.localVideoref.current.srcObject = null;
+    //   } catch(e){
+    //     console.log(e)
+    //   }
+    // }
   }
 
   getUserMediaSuccess = (stream) => {
@@ -109,9 +128,6 @@ class Video extends Component {
       }, () => {
         let tracks = this.localVideoref.current.srcObject.getTracks()
         tracks.forEach(track => track.stop())
-        this.localVideoref.current.srcObject = null;
-
-        this.getDislayMedia()
       })
     };
   }
@@ -119,9 +135,17 @@ class Video extends Component {
 
   getDislayMedia = () => {
     if (this.state.screen) {
+      if(socket !== null){
+        socket.disconnect()
+      }
+
       if(navigator.mediaDevices.getDisplayMedia){
-        navigator.mediaDevices.getDisplayMedia({video: this.state.screen})
+        navigator.mediaDevices.getDisplayMedia({video: true}) // this.state.screen
           .then(this.getDislayMediaSuccess)
+          .then((stream) => {
+            document.getElementById('div-videos').innerHTML = ""
+            this.connectToSocketServer()
+          })
           .catch((e) => console.log(e))
       }
     }
@@ -138,9 +162,12 @@ class Video extends Component {
         audio: this.state.audio,
         screen: false,
       }, () => {
-        let tracks = this.localVideoref.current.srcObject.getTracks()
-        tracks.forEach(track => track.stop())
-        this.localVideoref.current.srcObject = null;
+        try{
+          let tracks = this.localVideoref.current.srcObject.getTracks()
+          tracks.forEach(track => track.stop())
+        } catch(e) {
+          console.log(e)
+        }
 
         this.getUserMedia()
       })
@@ -153,7 +180,7 @@ class Video extends Component {
     var signal = JSON.parse(message)
 
     //Make sure it's not coming from yourself
-    if(fromId !== this.socketId) {
+    if(fromId !== socketId) {
 			if(signal.sdp){            
 				connections[fromId].setRemoteDescription(new RTCSessionDescription(signal.sdp)).then(() => {                
 					if(signal.sdp.type === 'offer') {
@@ -180,7 +207,7 @@ class Video extends Component {
 
       socket.emit('join-call', this.path);
 
-      this.socketId = socket.id;
+      socketId = socket.id;
       socket.on('user-left', function(id){
         var video = document.querySelector(`[data-socket="${id}"]`);
         if(video !== null){
@@ -188,8 +215,9 @@ class Video extends Component {
           video.parentElement.parentElement.removeChild(parentDiv);
         }
       });
-
+      
       socket.on('user-joined', function(id, clients){
+        connections = {} // TODO eh, una merda, ma non so come fare
         clients.forEach(function(socketListId) {
           if(connections[socketListId] === undefined){
             connections[socketListId] = new RTCPeerConnection(peerConnectionConfig);
@@ -226,6 +254,8 @@ class Video extends Component {
             //Add the local video stream
             if(window.localStream !== undefined){
               connections[socketListId].addStream(window.localStream); 
+            } else {
+              console.log("DIO PORCOO")
             }
           }
         });
