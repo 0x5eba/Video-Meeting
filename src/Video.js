@@ -13,12 +13,12 @@ import CallEndIcon from '@material-ui/icons/CallEnd';
 
 import Grid from 'react-css-grid'
 
-const server_url = "https://fa40f31e.ngrok.io" //"http://localhost:3000"
+const server_url = "https://81569a05.ngrok.io" //"http://localhost:3000"
 
 var connections = {}
 const peerConnectionConfig = {
   'iceServers': [
-    // {'urls': 'stun:stun.services.mozilla.com'},
+    {'urls': 'stun:stun.services.mozilla.com'},
     {'urls': 'stun:stun.l.google.com:19302'},
   ]
 }
