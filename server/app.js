@@ -33,9 +33,14 @@ db.on('error', console.error.bind(console, 'MongoDB connection error:'))
 
 var config = JSON.parse(fs.readFileSync('config.json', 'utf8'))
 app.listen(process.env.PORT || config.port, config.ip, () => {
-	console.log("http://" + config.ip + ":" + config.port)
+	console.log(config.ip + ":" + config.port)
 })
 
+const path = require("path")
+app.use(express.static(__dirname+"/../build"))
+app.get("/", (req, res, next) => {
+	res.sendFile(path.join(__dirname+"/../build/index.html"))
+})
 
 
 var app1 = express(); 
@@ -56,6 +61,8 @@ io.on('connection', function(socket){
 		for(let a = 0; a < connections[path].length; ++a){
 			io.to(connections[path][a]).emit("user-joined", socket.id, connections[path]);
 		}
+
+		console.log(connections)
 	});
 
 	socket.on('signal', (toId, message) => {

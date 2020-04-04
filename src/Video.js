@@ -13,12 +13,12 @@ import CallEndIcon from '@material-ui/icons/CallEnd';
 
 import Grid from 'react-css-grid'
 
-const server_url = "http://localhost:3000"
+const server_url = "https://fa40f31e.ngrok.io" //"http://localhost:3000"
 
 var connections = {}
 const peerConnectionConfig = {
   'iceServers': [
-    {'urls': 'stun:stun.services.mozilla.com'},
+    // {'urls': 'stun:stun.services.mozilla.com'},
     {'urls': 'stun:stun.l.google.com:19302'},
   ]
 }
@@ -38,13 +38,7 @@ class Video extends Component {
     this.screenAvailable = false
 
     this.video = false
-    if(this.videoAvailable){
-      this.video = true
-    }
     this.audio = false
-    if(this.audioAvailable){
-      this.audio = true
-    }
     this.screen = false
 
     this.state = {
@@ -52,9 +46,29 @@ class Video extends Component {
       audio: false,
       screen: false,
     }
+
+    this.getMedia()
   }
 
-  UNSAFE_componentWillMount = () => {
+  async getMedia() {
+    await navigator.mediaDevices.getUserMedia({video: true})
+      .then((stream) => {
+        this.videoAvailable = true
+        this.video = true
+      })
+      .catch((e) => {
+        this.videoAvailable = false
+      })
+
+    await navigator.mediaDevices.getUserMedia({audio: true})
+      .then((stream) => {
+        this.audioAvailable = true
+        this.audio = true
+      })
+      .catch((e) => {
+        this.audioAvailable = false
+      })
+
     this.setState({ 
       video: this.video,
       audio: this.audio,
@@ -62,19 +76,6 @@ class Video extends Component {
     }, () => {
       this.getUserMedia()
     })
-  }
-
-  async getMedia() {
-    await navigator.mediaDevices.getUserMedia({video: true, audio: true})
-      .then((stream) => {
-        this.videoAvailable = true
-        this.audioAvailable = true
-      })
-      .catch((e) => {
-        console.log(e)
-        this.videoAvailable = false
-        this.audioAvailable = false
-      })
 
     if(navigator.mediaDevices.getDisplayMedia){
       this.screenAvailable = true
@@ -86,50 +87,42 @@ class Video extends Component {
 
   getUserMedia = () => {
     console.log(this.state)
-    if(this.state.video) {
+    if((this.state.video && this.videoAvailable) || (this.state.audio && this.audioAvailable)) {
       if(socket !== null){
         socket.disconnect()
       }
-      navigator.mediaDevices.getUserMedia({video: true})
+      navigator.mediaDevices.getUserMedia({video: this.state.video, audio: this.state.audio})
         .then(this.getUserMediaSuccess)
         .then((stream) => {
           document.getElementById('div-videos').innerHTML = ""
           this.connectToSocketServer()
         })
         .catch((e) => console.log(e))
+    } else {
+      try {
+        let tracks = this.localVideoref.current.srcObject.getTracks()
+        tracks.forEach(track => track.stop())
+      } catch(e){
+        console.log(e)
+      }
     }
-    
-    // console.log(this.state, this.videoAvailable, this.audioAvailable)
-    // if((this.videoAvailable || this.audioAvailable) && (this.state.video || this.state.audio)) {
-    //   navigator.mediaDevices.getUserMedia({video: this.videoAvailable && this.state.video, audio: this.audioAvailable && this.state.audio})
-    //     .then(this.getUserMediaSuccess)
-    //     .catch((e) => console.log(e))
-    // } else {
-    //   try {
-    //     let tracks = this.localVideoref.current.srcObject.getTracks()
-    //     tracks.forEach(track => track.stop())
-    //     this.localVideoref.current.srcObject = null;
-    //   } catch(e){
-    //     console.log(e)
-    //   }
-    // }
   }
 
   getUserMediaSuccess = (stream) => {
     window.localStream = stream
     this.localVideoref.current.srcObject = stream
     
-    stream.getVideoTracks()[0].onended = () => {
-      console.log("video / audio false")
-      this.setState({ 
-        video: false,
-        audio: false,
-        screen: this.state.screen
-      }, () => {
-        let tracks = this.localVideoref.current.srcObject.getTracks()
-        tracks.forEach(track => track.stop())
-      })
-    };
+    // stream.getVideoTracks()[0].onended = () => {
+    //   console.log("video / audio false")
+    //   this.setState({ 
+    //     video: false,
+    //     audio: false,
+    //     screen: this.state.screen
+    //   }, () => {
+    //     let tracks = this.localVideoref.current.srcObject.getTracks()
+    //     tracks.forEach(track => track.stop())
+    //   })
+    // };
   }
 
 
@@ -217,6 +210,7 @@ class Video extends Component {
       });
       
       socket.on('user-joined', function(id, clients){
+        console.log("FINE")
         connections = {} // TODO eh, una merda, ma non so come fare
         clients.forEach(function(socketListId) {
           if(connections[socketListId] === undefined){
@@ -255,7 +249,7 @@ class Video extends Component {
             if(window.localStream !== undefined){
               connections[socketListId].addStream(window.localStream); 
             } else {
-              console.log("DIO PORCOO")
+              alert("DIO CANE")
             }
           }
         });
@@ -307,7 +301,6 @@ class Video extends Component {
     try {
       let tracks = this.localVideoref.current.srcObject.getTracks()
       tracks.forEach(track => track.stop())
-      this.localVideoref.current.srcObject = null;
     } catch(e){
 
     }

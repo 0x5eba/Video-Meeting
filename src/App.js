@@ -9,8 +9,9 @@ class App extends Component {
       <div>
         <Router>
           <Switch>
-            <Route path="/" exact component={Home} />
-            <Route path="/:url" component={Video} />
+            {/* <Route path="/" exact component={Home} />
+            <Route path="/:url" component={Video} /> */}
+            <Route path="/" component={Video} />
           </Switch>
         </Router>
       </div>
