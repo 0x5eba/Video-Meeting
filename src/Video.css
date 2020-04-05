@@ -31,6 +31,7 @@ body {
 }
 
 .btn-down {
+    z-index: 9999;
     position: fixed; 
     bottom: 2%;
     width: 100%;
