@@ -104,6 +104,8 @@ class Video extends Component {
 						}
 					}
 
+					console.log("OK")
+
 					this.connectToSocketServer()
 				})
 				.catch((e) => console.log(e))
@@ -142,7 +144,7 @@ class Video extends Component {
 			}
 
 			if (navigator.mediaDevices.getDisplayMedia) {
-				navigator.mediaDevices.getDisplayMedia({ video: true }) // this.state.screen
+				navigator.mediaDevices.getDisplayMedia({ video: true })
 					.then(this.getDislayMediaSuccess)
 					.then((stream) => {
 						var main = document.getElementById('main')
