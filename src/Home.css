@@ -1,4 +1,4 @@
-/* html, body {
+html, body {
   height: 100%;
 }
 body {
@@ -6,22 +6,9 @@ body {
   background-color: whitesmoke;
 }
 
-.flex-container {
-  height: 100vh;
-  width: 100vw;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+.container2 {
+  padding-top: 300px;
   align-items: center;
-}
-.row {
-  width: auto;
-}
-.flex-item {
-  padding: 5px;
-  margin: 50px;
-  line-height: 20px;
+  justify-content: center;
   text-align: center;
-} */
+}

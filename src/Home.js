@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import './Home.css';
 import { Input, Button } from '@material-ui/core';
+import "./Home.css"
 
 class Home extends Component {
 	constructor(props) {
@@ -33,18 +33,14 @@ class Home extends Component {
 
 	render() {
 		return (
-			<div className="flex-container">
-				<div className="row">
-					<div className="flex-item" style={{ marginTop: "-30%" }}>
-						<Input placeholder="URL" onChange={e => this.handleChange(e)} />
-					</div>
-					<div className="flex-item">
-						<Button variant="contained" color="primary" onClick={this.join} style={{ margin: "20px" }}>
-							Join call</Button>
-						<Button variant="contained" style={{ backgroundColor: "#4caf50", margin: "20px" }}
-							onClick={this.create}>
-							Create call</Button>
-					</div>
+			<div className="container2">
+				<Input placeholder="URL" onChange={e => this.handleChange(e)} />
+				<div>
+					<Button variant="contained" color="primary" onClick={this.join} style={{ margin: "20px" }}>
+						Join call</Button>
+					<Button variant="contained" style={{ backgroundColor: "#4caf50", margin: "20px" }}
+						onClick={this.create}>
+						Create call</Button>
 				</div>
 			</div>
 		)

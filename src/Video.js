@@ -96,7 +96,14 @@ class Video extends Component {
 			navigator.mediaDevices.getUserMedia({ video: this.state.video, audio: this.state.audio })
 				.then(this.getUserMediaSuccess)
 				.then((stream) => {
-					document.getElementById('main').innerHTML = ""
+					var main = document.getElementById('main')
+					var videos = main.querySelectorAll("video")
+					for(let a = 0; a < videos.length; ++a){
+						if(videos[a].id !== "my-video"){
+							videos[a].parentNode.removeChild(videos[a])
+						}
+					}
+
 					this.connectToSocketServer()
 				})
 				.catch((e) => console.log(e))
@@ -138,7 +145,14 @@ class Video extends Component {
 				navigator.mediaDevices.getDisplayMedia({ video: true }) // this.state.screen
 					.then(this.getDislayMediaSuccess)
 					.then((stream) => {
-						document.getElementById('main').innerHTML = ""
+						var main = document.getElementById('main')
+						var videos = main.querySelectorAll("video")
+						for(let a = 0; a < videos.length; ++a){
+							if(videos[a].id !== "my-video"){
+								videos[a].parentNode.removeChild(videos[a])
+							}
+						}
+
 						this.connectToSocketServer()
 					})
 					.catch((e) => console.log(e))
@@ -151,7 +165,6 @@ class Video extends Component {
 		this.localVideoref.current.srcObject = stream
 
 		stream.getVideoTracks()[0].onended = () => {
-			console.log("screen false")
 			this.setState({
 				video: this.state.video,
 				audio: this.state.audio,
@@ -203,12 +216,12 @@ class Video extends Component {
 			socket.emit('join-call', this.path);
 
 			socketId = socket.id;
+
 			socket.on('user-left', function (id) {
 				var video = document.querySelector(`[data-socket="${id}"]`);
 				if (video !== null) {
 					elms--
-					var parentDiv = video.parentElement;
-					video.parentElement.parentElement.removeChild(parentDiv);
+					video.parentNode.removeChild(video);
 
 					var main = document.getElementById('main')
 					var videos = main.querySelectorAll("video")
@@ -354,6 +367,7 @@ class Video extends Component {
 		return (
 			<div>
 				<div className="container">
+					
 					<Row id="main" className="flex-container">
 						<video id="my-video" ref={this.localVideoref} autoPlay></video>
 					</Row>
