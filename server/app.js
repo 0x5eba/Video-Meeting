@@ -50,6 +50,25 @@ io.on('connection', function(socket){
 	// 	io.sockets.emit("broadcast-message", socket.id, data);
 	// })
 
+	socket.on('chat-message', function(data) {
+		var key;
+		var ok = false
+		for (const [k, v] of Object.entries(connections)) {
+			for(let a = 0; a < v.length; ++a){
+				if(v[a] === socket.id){
+					key = k
+					ok = true
+				}
+			}
+		}
+
+		if(ok === true){
+			for(let a = 0; a < connections[key].length; ++a){
+				io.to(connections[key][a]).emit("chat-message", data);
+			}
+		}
+	})
+
 	socket.on('disconnect', function() {
 		var key;
 		var ok = false

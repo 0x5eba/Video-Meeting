@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import io from 'socket.io-client'
 import IconButton from '@material-ui/core/IconButton';
+import { Input, Button } from '@material-ui/core';
 
 import VideocamIcon from '@material-ui/icons/Videocam';
 import VideocamOffIcon from '@material-ui/icons/VideocamOff';
@@ -9,8 +10,10 @@ import MicOffIcon from '@material-ui/icons/MicOff';
 import ScreenShareIcon from '@material-ui/icons/ScreenShare';
 import StopScreenShareIcon from '@material-ui/icons/StopScreenShare';
 import CallEndIcon from '@material-ui/icons/CallEnd';
+import ChatIcon from '@material-ui/icons/Chat';
 
 import { Container, Row, Col} from 'reactstrap';
+import Modal from 'react-bootstrap/Modal'
 import 'bootstrap/dist/css/bootstrap.css';
 import "./Video.css"
 
@@ -48,9 +51,16 @@ class Video extends Component {
 			video: false,
 			audio: false,
 			screen: false,
+			showModal: false,
+			messages: [],
+			message: "",
 		}
 
+		this.addMessage = this.addMessage.bind(this);
+
 		this.getMedia()
+
+		this.connectToSocketServer()
 	}
 
 	async getMedia() {
@@ -219,6 +229,10 @@ class Video extends Component {
 
 			socketId = socket.id;
 
+			socket.on('chat-message', function (data) {
+				this.addMessage(data)
+			})
+
 			socket.on('user-left', function (id) {
 				var video = document.querySelector(`[data-socket="${id}"]`);
 				if (video !== null) {
@@ -327,8 +341,6 @@ class Video extends Component {
 	handleVideo = () => {
 		this.setState({
 			video: !this.state.video,
-			audio: this.state.audio,
-			screen: this.state.screen
 		}, () => {
 			this.getUserMedia()
 		})
@@ -336,9 +348,7 @@ class Video extends Component {
 
 	handleAudio = () => {
 		this.setState({
-			video: this.state.video,
 			audio: !this.state.audio,
-			screen: this.state.screen
 		}, () => {
 			this.getUserMedia()
 		})
@@ -346,8 +356,6 @@ class Video extends Component {
 
 	handleScreen = () => {
 		this.setState({
-			video: this.state.video,
-			audio: this.state.audio,
 			screen: !this.state.screen
 		}, () => {
 			this.getDislayMedia()
@@ -363,6 +371,39 @@ class Video extends Component {
 		}
 
 		window.location.href = "/"
+	}
+
+	
+
+	openChat = () => {
+		this.setState({
+			showModal: true,
+		}, () => {})
+	}
+
+	closeChat = () => {
+		this.setState({
+			showModal: false,
+		}, () => {})
+	}
+
+	handleMessage = (e) => {
+		this.setState({
+			message: e.target.value,
+		}, () => {})
+	}
+
+	addMessage = (data) => {
+		this.setState(prevState => ({
+			messages: [...prevState.messages, data]
+		}))
+	}
+
+	sendMessage = () => {
+		socket.emit('chat-message', this.state.message)
+		this.setState({
+			message: "",
+		}, () => {})
 	}
 
 	render() {
@@ -390,9 +431,27 @@ class Video extends Component {
 						<IconButton style={{ color: "#424242" }} onClick={this.handleScreen}>
 							{this.state.screen === false ? <ScreenShareIcon /> : <StopScreenShareIcon />}
 						</IconButton>
-					</div>
-				</div>
 
+						<IconButton style={{ color: "#424242" }} onClick={this.openChat}>
+							<ChatIcon />
+						</IconButton>
+					</div>
+
+					<Modal show={this.state.showModal} onHide={this.closeChat}>
+						<Modal.Header closeButton>
+						<Modal.Title>Chat Room</Modal.Title>
+						</Modal.Header>
+						<Modal.Body>
+							{this.state.messages.map((item) => (
+								<div><p>item</p></div>
+							))}
+						</Modal.Body>
+						<Modal.Footer>
+							<Input placeholder="Message" onChange={e => this.handleMessage(e)} />
+							<Button variant="secondary" onClick={this.sendMessage}>Send</Button>
+						</Modal.Footer>
+					</Modal>
+				</div>
 			</div>
 		)
 	}
