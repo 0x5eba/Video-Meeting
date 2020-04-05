@@ -2,10 +2,8 @@ import React, { Component } from 'react';
 import './Home.css';
 import { Input, Button } from '@material-ui/core';
 
-const api_url = "http://localhost:3001"
-
 class Home extends Component {
-  constructor(props) {
+	constructor(props) {
 		super(props)
 		this.state = {
 			url: '',
@@ -19,60 +17,38 @@ class Home extends Component {
 	}
 
 	join = () => {
-	  fetch(api_url + '/api/call/' + this.state.url, {
-			method: 'GET',
-		})
-		.then(data => data.json())
-		.then(data => {
-			if(data.err === undefined){
-				let url = data.url
-				window.location.href = `/${url}`
-			}
-		})
-		.catch((error) => {
-			console.error('Error:', error)
-		})
+		if(this.state.url !== ""){
+			window.location.href = `/${this.state.url}`
+		}
 	}
 
 	create = () => {
-		const data = { 
-			url: this.state.url
-		}
-		fetch(api_url + '/api/call/create', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify(data),
-		})
-		.then(data => data.json())
-		.then(data => {
-			let url = data.url
+		if(this.state.url === ""){
+			var url = Math.random().toString(36).substring(2, 7)
 			window.location.href = `/${url}`
-		})
-		.catch((error) => {
-			console.error('Error:', error)
-		})
+		} else {
+			window.location.href = `/${this.state.url}`
+		}
 	}
 
-  render() {
-    return (
-      <div className="flex-container">
+	render() {
+		return (
+			<div className="flex-container">
 				<div className="row">
-					<div className="flex-item" style={{marginTop: "-30%"}}>
-						<Input placeholder="URL" onChange={e => this.handleChange(e)}/>
+					<div className="flex-item" style={{ marginTop: "-30%" }}>
+						<Input placeholder="URL" onChange={e => this.handleChange(e)} />
 					</div>
 					<div className="flex-item">
-						<Button variant="contained" color="primary" onClick={this.join} style={{margin: "20px"}}>
+						<Button variant="contained" color="primary" onClick={this.join} style={{ margin: "20px" }}>
 							Join call</Button>
-						<Button variant="contained" style={{backgroundColor: "#4caf50", margin: "20px"}}
+						<Button variant="contained" style={{ backgroundColor: "#4caf50", margin: "20px" }}
 							onClick={this.create}>
 							Create call</Button>
 					</div>
 				</div>
-      </div>
-    )
-  }
+			</div>
+		)
+	}
 }
 
 export default Home;
