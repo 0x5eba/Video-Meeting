@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import io from 'socket.io-client'
 import IconButton from '@material-ui/core/IconButton';
-import "./Video.css"
 
 import VideocamIcon from '@material-ui/icons/Videocam';
 import VideocamOffIcon from '@material-ui/icons/VideocamOff';
@@ -11,7 +10,9 @@ import ScreenShareIcon from '@material-ui/icons/ScreenShare';
 import StopScreenShareIcon from '@material-ui/icons/StopScreenShare';
 import CallEndIcon from '@material-ui/icons/CallEnd';
 
-import Grid from 'react-css-grid'
+import { Container, Row, Col} from 'reactstrap';
+import 'bootstrap/dist/css/bootstrap.css';
+import "./Video.css"
 
 const server_url = "http://localhost:3000" //"http://localhost:3000"
 
@@ -24,6 +25,8 @@ const peerConnectionConfig = {
 }
 var socket = null
 var socketId = null
+
+var elms = 0
 
 class Video extends Component {
 	constructor(props) {
@@ -93,7 +96,7 @@ class Video extends Component {
 			navigator.mediaDevices.getUserMedia({ video: this.state.video, audio: this.state.audio })
 				.then(this.getUserMediaSuccess)
 				.then((stream) => {
-					document.getElementById('div-videos').innerHTML = ""
+					document.getElementById('main').innerHTML = ""
 					this.connectToSocketServer()
 				})
 				.catch((e) => console.log(e))
@@ -135,7 +138,7 @@ class Video extends Component {
 				navigator.mediaDevices.getDisplayMedia({ video: true }) // this.state.screen
 					.then(this.getDislayMediaSuccess)
 					.then((stream) => {
-						document.getElementById('div-videos').innerHTML = ""
+						document.getElementById('main').innerHTML = ""
 						this.connectToSocketServer()
 					})
 					.catch((e) => console.log(e))
@@ -203,8 +206,30 @@ class Video extends Component {
 			socket.on('user-left', function (id) {
 				var video = document.querySelector(`[data-socket="${id}"]`);
 				if (video !== null) {
+					elms--
 					var parentDiv = video.parentElement;
 					video.parentElement.parentElement.removeChild(parentDiv);
+
+					var main = document.getElementById('main')
+					var videos = main.querySelectorAll("video")
+
+					var width = ""
+					if(elms === 1 || elms === 2){
+						width = "100%"
+					} else if(elms === 3 || elms === 4){
+						width = "40%"
+					} else {
+						width = String(100/elms) + "%"
+					}
+
+					var height = String(100/elms) + "%"
+
+					for(let a = 0; a < videos.length; ++a){
+						videos[a].style.minWidth = "30%"
+						videos[a].style.minHeight = "30%"
+						videos[a].style.setProperty("width", width)
+						videos[a].style.setProperty("height", height)
+					}
 				}
 			});
 
@@ -223,9 +248,37 @@ class Video extends Component {
 
 						//Wait for their video stream
 						connections[socketListId].onaddstream = function (event) {
-							var videos = document.getElementById('div-videos')
-							var div = document.createElement('div')
+
+							// TODO mute button, full screen button
+
+							elms = clients.length
+							var main = document.getElementById('main')
+							var videos = main.querySelectorAll("video")
+
+							var width = ""
+							if(elms === 1 || elms === 2){
+								width = "100%"
+							} else if(elms === 3 || elms === 4){
+								width = "40%"
+							} else {
+								width = String(100/elms) + "%"
+							}
+
+							var height = String(100/elms) + "%"
+
+							for(let a = 0; a < videos.length; ++a){
+								videos[a].style.minWidth = "30%"
+								videos[a].style.minHeight = "30%"
+								videos[a].style.setProperty("width", width)
+								videos[a].style.setProperty("height", height)
+							}
+							
 							var video = document.createElement('video')
+							video.style.minWidth = "30%"
+							video.style.minHeight = "30%"
+							video.style.setProperty("width", width)
+							video.style.setProperty("height", height)
+							video.style.margin = "10px"
 
 							video.setAttribute('data-socket', socketListId);
 							video.srcObject = event.stream
@@ -233,22 +286,12 @@ class Video extends Component {
 							// video.muted       = true;
 							video.playsinline = true;
 
-							// TODO mute button, full screen button
-
-							video.style.minWidth = "500px"
-							video.style.maxWidth = "100%"
-							video.style.minHeight = "500px"
-							video.style.maxHeight = "100%"
-
-							div.appendChild(video)
-							videos.appendChild(div);
+							main.appendChild(video)
 						}
 
 						//Add the local video stream
 						if (window.localStream !== undefined) {
 							connections[socketListId].addStream(window.localStream);
-						} else {
-							alert("DIO CANE")
 						}
 					}
 				});
@@ -310,30 +353,29 @@ class Video extends Component {
 	render() {
 		return (
 			<div>
-				<div id="bottons">
-					<IconButton style={{ color: "#424242" }} onClick={this.handleVideo}>
-						{(this.state.video === false) ? <VideocamIcon /> : <VideocamOffIcon />}
-					</IconButton>
+				<div className="container">
+					<Row id="main" className="flex-container">
+						<video id="my-video" ref={this.localVideoref} autoPlay></video>
+					</Row>
 
-					<IconButton style={{ color: "#f44336" }} onClick={this.handleEndCall}>
-						<CallEndIcon />
-					</IconButton>
+					<div className="btn-down">
+						<IconButton style={{ color: "#424242" }} onClick={this.handleVideo}>
+							{(this.state.video === false) ? <VideocamIcon /> : <VideocamOffIcon />}
+						</IconButton>
 
-					<IconButton style={{ color: "#424242" }} onClick={this.handleAudio}>
-						{this.state.audio === false ? <MicIcon /> : <MicOffIcon />}
-					</IconButton>
+						<IconButton style={{ color: "#f44336" }} onClick={this.handleEndCall}>
+							<CallEndIcon />
+						</IconButton>
 
-					<IconButton style={{ color: "#424242" }} onClick={this.handleScreen}>
-						{this.state.screen === false ? <ScreenShareIcon /> : <StopScreenShareIcon />}
-					</IconButton>
+						<IconButton style={{ color: "#424242" }} onClick={this.handleAudio}>
+							{this.state.audio === false ? <MicIcon /> : <MicOffIcon />}
+						</IconButton>
+
+						<IconButton style={{ color: "#424242" }} onClick={this.handleScreen}>
+							{this.state.screen === false ? <ScreenShareIcon /> : <StopScreenShareIcon />}
+						</IconButton>
+					</div>
 				</div>
-
-				<video ref={this.localVideoref} autoPlay style={{ backgroundColor: "black" }}></video>
-				<Grid
-					width={500}
-					gap={24} id="div-videos">
-
-				</Grid>
 
 			</div>
 		)
