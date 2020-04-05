@@ -23,6 +23,13 @@ body {
     text-align: center;
 }
 
+.div-send-msg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
 .btn-down {
     position: fixed; 
     bottom: 2%;

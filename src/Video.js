@@ -229,9 +229,7 @@ class Video extends Component {
 
 			socketId = socket.id;
 
-			socket.on('chat-message', function (data) {
-				this.addMessage(data)
-			})
+			socket.on('chat-message', this.addMessage)
 
 			socket.on('user-left', function (id) {
 				var video = document.querySelector(`[data-socket="${id}"]`);
@@ -393,9 +391,9 @@ class Video extends Component {
 		}, () => {})
 	}
 
-	addMessage = (data) => {
+	addMessage = (data, sender) => {
 		this.setState(prevState => ({
-			messages: [...prevState.messages, data]
+			messages: [...prevState.messages, {"sender": sender, "data": data}]
 		}))
 	}
 
@@ -441,14 +439,14 @@ class Video extends Component {
 						<Modal.Header closeButton>
 						<Modal.Title>Chat Room</Modal.Title>
 						</Modal.Header>
-						<Modal.Body>
-							{this.state.messages.map((item) => (
-								<div><p>item</p></div>
-							))}
+						<Modal.Body style={{overflow: "auto", overflowY: "auto", height: "500px"}} >
+							{this.state.messages.length > 0 ? this.state.messages.map((item) => (
+								<div><b>{item.sender}</b><p style={{ wordBreak: "break-all"}}>{item.data}</p></div>
+							)) : <p>No message yet</p>}
 						</Modal.Body>
-						<Modal.Footer>
-							<Input placeholder="Message" onChange={e => this.handleMessage(e)} />
-							<Button variant="secondary" onClick={this.sendMessage}>Send</Button>
+						<Modal.Footer className="div-send-msg">
+							<Input placeholder="Message" value={this.state.message} onChange={e => this.handleMessage(e)} />
+							<Button variant="contained" color="primary" onClick={this.sendMessage}>Send</Button>
 						</Modal.Footer>
 					</Modal>
 				</div>

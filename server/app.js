@@ -27,6 +27,8 @@ var io = require('socket.io')(app2);
 
 connections = {}
 
+messages = {}
+
 io.on('connection', function(socket){
 
 	socket.on('join-call', (path) => {
@@ -37,6 +39,12 @@ io.on('connection', function(socket){
 
 		for(let a = 0; a < connections[path].length; ++a){
 			io.to(connections[path][a]).emit("user-joined", socket.id, connections[path]);
+		}
+
+		if(messages[path] !== undefined){
+			for(let a = 0; a < messages[path].length; ++a){
+				io.to(socket.id).emit("chat-message", messages[path][a]['data'], messages[path][a]['sender']);
+			}
 		}
 
 		console.log(connections)
@@ -63,8 +71,13 @@ io.on('connection', function(socket){
 		}
 
 		if(ok === true){
+			if(messages[key] === undefined){
+				messages[key] = []
+			}
+			messages[key].push({"sender": socket.id, "data": data})
+
 			for(let a = 0; a < connections[key].length; ++a){
-				io.to(connections[key][a]).emit("chat-message", data);
+				io.to(connections[key][a]).emit("chat-message", data, socket.id);
 			}
 		}
 	})
