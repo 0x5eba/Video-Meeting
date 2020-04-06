@@ -25,6 +25,8 @@ messages = {}
 
 io.on('connection', function(socket){
 
+	console.log("NEW connections")
+
 	socket.on('join-call', (path) => {
 		if(connections[path] === undefined){
 			connections[path] = []
