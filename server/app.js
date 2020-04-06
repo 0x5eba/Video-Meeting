@@ -107,7 +107,7 @@ io.on('connection', function(socket){
 	})
 });
 
-// var PORT2 = process.env.PORT || 3000
-// app2.listen(PORT2, function(){
-// 	console.log("socket on port", PORT2);
-// });
+var PORT2 = 3000
+app2.listen(PORT2, function(){
+	console.log("socket on port", PORT2);
+});
