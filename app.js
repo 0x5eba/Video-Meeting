@@ -1,26 +1,25 @@
-// const fs = require('fs')
-// const express = require('express')
-// const http = require('http')
-// var cors = require('cors')
-// const app = express()
-// const bodyParser = require('body-parser')
-// const path = require("path")
+const fs = require('fs')
+const express = require('express')
+const http = require('http')
+var cors = require('cors')
+const app = express()
+const bodyParser = require('body-parser')
+const path = require("path")
+
+var server = http.createServer(app);
+var io = require('socket.io')(server);
 
 // app.use(cors())
 // app.use(bodyParser.json())
 
-// if(process.env.NODE_ENV==='production'){
-// 	app.use(express.static(__dirname+"/build"))
-// 	app.get("*", (req, res, next) => {
-// 		res.sendFile(path.join(__dirname+"/build/index.html"))
-// 	})	
-// }
+if(process.env.NODE_ENV==='production'){
+	app.use(express.static(__dirname+"/build"))
+	app.get("/", (req, res, next) => {
+		res.sendFile(path.join(__dirname+"/build/index.html"))
+	})
+}
+app.set('port', (process.env.PORT || 3001))
 
-var app = require('http').createServer()
-var io = module.exports.io = require('socket.io')(app)
-
-// var server = http.createServer(app);
-// var io = require('socket.io')(server);
 
 connections = {}
 
@@ -105,7 +104,6 @@ io.on('connection', function(socket){
 });
 
 
-var PORT = process.env.PORT || 3001
-app.listen(PORT, () => {
+server.listen(app.get('port'), () => {
 	console.log("listening on ", PORT)
 })
