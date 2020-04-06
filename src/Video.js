@@ -19,7 +19,7 @@ import "./Video.css"
 
 // questo link e' eseguito con ngrok http 3000, quindi un ngrok solo per la porta 3000, e un altro per 3001 dove c'e' l'app
 // const server_url = process.env.NODE_ENV === 'production' ? 'videomeeting-sebastienbiollo.herokuapp.com' : "http://localhost:3001"
-const server_url = "videomeeting-sebastienbiollo.herokuapp.com:" + String(process.env.PORT)
+const server_url = process.env.NODE_ENV === 'production' ? 'videomeeting-sebastienbiollo.herokuapp.com' : "http://localhost:3001"
 
 var connections = {}
 const peerConnectionConfig = {
