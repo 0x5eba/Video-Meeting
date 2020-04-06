@@ -38,8 +38,6 @@ class Video extends Component {
 
 		this.localVideoref = React.createRef()
 
-		this.path = window.location.href
-
 		this.videoAvailable = false
 		this.audioAvailable = false
 		this.screenAvailable = false
@@ -224,13 +222,15 @@ class Video extends Component {
 		// socket = io.connect(server_url, { secure: true });
 		socket = io.connect(server_url);
 
+		console.log(server_url)
+
 		socket.on('signal', this.gotMessageFromServer);
 
 		socket.on('connect', () => {
 
 			console.log("connected")
 
-			socket.emit('join-call', this.path);
+			socket.emit('join-call', window.location.href);
 
 			socketId = socket.id;
 

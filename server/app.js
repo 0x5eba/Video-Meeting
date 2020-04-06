@@ -16,7 +16,7 @@ if(process.env.NODE_ENV==='production'){
 	})	
 }
 
-var PORT1 = process.env.PORT || 3001
+var PORT1 = 3001 // process.env.PORT || 
 app.listen(PORT1, () => {
 	console.log("app on", PORT1)
 })
