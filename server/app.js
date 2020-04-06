@@ -9,14 +9,16 @@ const path = require("path")
 app.use(cors())
 app.use(bodyParser.json())
 
-app.use(express.static(__dirname+"/../build"))
-app.get("/", (req, res, next) => {
-	res.sendFile(path.join(__dirname+"/../build/index.html"))
-})
+if(process.env.NODE_ENV==='production'){
+	app.use(express.static(__dirname+"/../build"))
+	app.get("/", (req, res, next) => {
+		res.sendFile(path.join(__dirname+"/../build/index.html"))
+	})	
+}
 
-var config = JSON.parse(fs.readFileSync('config.json', 'utf8'))
-app.listen(process.env.PORT || config.port, config.ip, () => {
-	console.log("app on", config.ip + ":" + config.port)
+var PORT1 = process.env.PORT || 3001
+app.listen(PORT1, () => {
+	console.log("app on", PORT1)
 })
 
 
@@ -105,6 +107,7 @@ io.on('connection', function(socket){
 	})
 });
 
-app2.listen(3000, function(){
-	console.log("socket on port %d", app2.address().port);
+var PORT2 = process.env.PORT || 3000
+app2.listen(PORT2, function(){
+	console.log("socket on port", PORT2);
 });
