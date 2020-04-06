@@ -28,7 +28,7 @@
     "socket.io-client": "^2.3.0"
   },
   "scripts": {
-    "start": "cd server && nodemon app.js",
+    "start": "node app.js",
     "dev": "concurrently -n 'server,client' -c 'red,green'  \"cd server && nodemon app.js\" \"PORT=8000 react-scripts start\"",
     "build": "react-scripts build",
     "test": "react-scripts test",
