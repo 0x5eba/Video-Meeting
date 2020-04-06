@@ -9,8 +9,8 @@ const path = require("path")
 var server = http.createServer(app);
 var io = require('socket.io')(server);
 
-// app.use(cors())
-// app.use(bodyParser.json())
+app.use(cors())
+app.use(bodyParser.json())
 
 if(process.env.NODE_ENV==='production'){
 	app.use(express.static(__dirname+"/build"))
