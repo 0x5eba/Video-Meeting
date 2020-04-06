@@ -220,8 +220,8 @@ class Video extends Component {
 	}
 
 	connectToSocketServer = () => {
-		// socket = io.connect(server_url, { secure: true });
-		socket = io.connect(server_url);
+		socket = io.connect(server_url, { secure: true });
+		// socket = io.connect(server_url);
 
 		console.log(server_url)
 
