@@ -16,16 +16,8 @@ if(process.env.NODE_ENV==='production'){
 	})	
 }
 
-var PORT1 = 3001 // process.env.PORT || 
-app.listen(PORT1, () => {
-	console.log("app on", PORT1)
-})
-
-
-var app1 = express(); 
-var app2 = http.createServer(app1);
-
-var io = require('socket.io')(app2);
+var server = http.createServer(app);
+var io = require('socket.io')(server);
 
 connections = {}
 
@@ -107,7 +99,8 @@ io.on('connection', function(socket){
 	})
 });
 
-var PORT2 = 3000
-app2.listen(PORT2, function(){
-	console.log("socket on port", PORT2);
-});
+
+var PORT = process.env.PORT || 3000
+app.listen(PORT, () => {
+	console.log("listening on ", PORT)
+})
