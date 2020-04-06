@@ -17,12 +17,11 @@
     "socket.io-client": "^2.3.0"
   },
   "scripts": {
-    "start": "PORT=8000 react-scripts start",
+    "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
-  "proxy": "http://localhost:3001",
   "eslintConfig": {
     "extends": "react-app"
   },
