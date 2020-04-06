@@ -105,5 +105,5 @@ io.on('connection', function(socket){
 
 
 server.listen(app.get('port'), () => {
-	console.log("listening on ", PORT)
+	console.log("listening on ", app.get('port'))
 })

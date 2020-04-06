@@ -10,6 +10,7 @@
     "@testing-library/user-event": "^7.1.2",
     "bootstrap": "^4.4.1",
     "concurrently": "^5.1.0",
+    "cors": "^2.8.5",
     "express": "^4.17.1",
     "nodemon": "^2.0.2",
     "react": "^16.13.1",
@@ -28,9 +29,9 @@
     "socket.io-client": "^2.3.0"
   },
   "scripts": {
-    "build-client": "cd src && npm run build",
-    "install-client": "cd src && npm install",
-    "heroku-postbuild": "npm run install-client && npm run build-client",
+    "build-client": "cd src && yarn build",
+    "install-client": "cd src && yarn install",
+    "heroku-postbuild": "yarn install-client && yarn build-client",
     "start": "node app.js",
     "dev": "concurrently -n 'server,client' -c 'red,green'  \"cd server && nodemon app.js\" \"PORT=8000 react-scripts start\"",
     "build": "react-scripts build",
