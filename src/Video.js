@@ -17,6 +17,7 @@ import Modal from 'react-bootstrap/Modal'
 import 'bootstrap/dist/css/bootstrap.css';
 import "./Video.css"
 
+// questo link e' eseguito con ngrok http 3000, quindi un ngrok solo per la porta 3000, e un altro per 3001 dove c'e' l'app
 const server_url = "http://localhost:3000" //"http://localhost:3000"
 
 var connections = {}
@@ -60,7 +61,7 @@ class Video extends Component {
 
 		this.getMedia()
 
-		this.connectToSocketServer()
+		// this.connectToSocketServer()
 	}
 
 	async getMedia() {
@@ -114,8 +115,6 @@ class Video extends Component {
 						}
 					}
 
-					console.log("OK")
-
 					this.connectToSocketServer()
 				})
 				.catch((e) => console.log(e))
@@ -132,6 +131,8 @@ class Video extends Component {
 	getUserMediaSuccess = (stream) => {
 		window.localStream = stream
 		this.localVideoref.current.srcObject = stream
+
+		console.log("getUserMediaSuccess")
 
 		// stream.getVideoTracks()[0].onended = () => {
 		//   console.log("video / audio false")
@@ -220,10 +221,14 @@ class Video extends Component {
 	}
 
 	connectToSocketServer = () => {
-		socket = io.connect(server_url, { secure: true });
+		// socket = io.connect(server_url, { secure: true });
+		socket = io.connect(server_url);
+
 		socket.on('signal', this.gotMessageFromServer);
 
 		socket.on('connect', () => {
+
+			console.log("connected")
 
 			socket.emit('join-call', this.path);
 
@@ -410,12 +415,12 @@ class Video extends Component {
 				<div className="container">
 					
 					<Row id="main" className="flex-container">
-						<video id="my-video" ref={this.localVideoref} autoPlay></video>
+						<video id="my-video" ref={this.localVideoref} autoPlay muted></video>
 					</Row>
 
 					<div className="btn-down">
 						<IconButton style={{ color: "#424242" }} onClick={this.handleVideo}>
-							{(this.state.video === false) ? <VideocamIcon /> : <VideocamOffIcon />}
+							{(this.state.video === true) ? <VideocamIcon /> : <VideocamOffIcon />}
 						</IconButton>
 
 						<IconButton style={{ color: "#f44336" }} onClick={this.handleEndCall}>
@@ -423,11 +428,11 @@ class Video extends Component {
 						</IconButton>
 
 						<IconButton style={{ color: "#424242" }} onClick={this.handleAudio}>
-							{this.state.audio === false ? <MicIcon /> : <MicOffIcon />}
+							{this.state.audio === true ? <MicIcon /> : <MicOffIcon />}
 						</IconButton>
 
 						<IconButton style={{ color: "#424242" }} onClick={this.handleScreen}>
-							{this.state.screen === false ? <ScreenShareIcon /> : <StopScreenShareIcon />}
+							{this.state.screen === true ? <ScreenShareIcon /> : <StopScreenShareIcon />}
 						</IconButton>
 
 						<IconButton style={{ color: "#424242" }} onClick={this.openChat}>

@@ -16,7 +16,7 @@ app.get("/", (req, res, next) => {
 
 var config = JSON.parse(fs.readFileSync('config.json', 'utf8'))
 app.listen(process.env.PORT || config.port, config.ip, () => {
-	console.log(config.ip + ":" + config.port)
+	console.log("app on", config.ip + ":" + config.port)
 })
 
 
@@ -106,5 +106,5 @@ io.on('connection', function(socket){
 });
 
 app2.listen(3000, function(){
-	console.log("Express server listening on port %d", app2.address().port);
+	console.log("socket on port %d", app2.address().port);
 });
