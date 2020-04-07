@@ -41,7 +41,6 @@ class Video extends Component {
 
 		this.videoAvailable = false
 		this.audioAvailable = false
-		this.screenAvailable = false
 
 		this.video = false
 		this.audio = false
@@ -52,6 +51,7 @@ class Video extends Component {
 			audio: false,
 			screen: false,
 			showModal: false,
+			screenAvailable: false,
 			messages: [],
 			message: "",
 		}
@@ -91,9 +91,13 @@ class Video extends Component {
 		})
 
 		if (navigator.mediaDevices.getDisplayMedia) {
-			this.screenAvailable = true
+			this.setState({
+				screenAvailable: true,
+			}, () => {})
 		} else {
-			this.screenAvailable = false
+			this.setState({
+				screenAvailable: false,
+			}, () => {})
 		}
 	}
 
@@ -432,16 +436,18 @@ class Video extends Component {
 							{this.state.audio === true ? <MicIcon /> : <MicOffIcon />}
 						</IconButton>
 
-						<IconButton style={{ color: "#424242" }} onClick={this.handleScreen}>
-							{this.state.screen === true ? <ScreenShareIcon /> : <StopScreenShareIcon />}
-						</IconButton>
+						{this.state.screenAvailable === true ?
+							<IconButton style={{ color: "#424242" }} onClick={this.handleScreen}>
+								{this.state.screen === true ? <ScreenShareIcon /> : <StopScreenShareIcon />}
+							</IconButton>
+						: null }
 
 						<IconButton style={{ color: "#424242" }} onClick={this.openChat}>
 							<ChatIcon />
 						</IconButton>
 					</div>
 
-					<Modal show={this.state.showModal} onHide={this.closeChat}>
+					<Modal show={this.state.showModal} onHide={this.closeChat} style={{zIndex: "999999", width: "auto"}}>
 						<Modal.Header closeButton>
 						<Modal.Title>Chat Room</Modal.Title>
 						</Modal.Header>

@@ -33,7 +33,7 @@
     "install-client": "cd src && yarn install",
     "heroku-postbuild": "yarn install-client && yarn build-client",
     "start": "node app.js",
-    "dev": "concurrently -n 'server,client' -c 'red,green'  \"cd server && nodemon app.js\" \"PORT=8000 react-scripts start\"",
+    "dev": "concurrently -n 'server,client' -c 'red,green'  \"nodemon app.js\" \"PORT=8000 react-scripts start\"",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
