@@ -60,7 +60,7 @@ class Video extends Component {
 
 		this.getMedia()
 
-		// this.connectToSocketServer()
+		this.connectToSocketServer()
 	}
 
 	async getMedia() {
@@ -225,9 +225,6 @@ class Video extends Component {
 
 	connectToSocketServer = () => {
 		socket = io.connect(server_url, { secure: true });
-		// socket = io.connect(server_url);
-
-		console.log(server_url)
 
 		socket.on('signal', this.gotMessageFromServer);
 
@@ -447,7 +444,7 @@ class Video extends Component {
 						</IconButton>
 					</div>
 
-					<Modal show={this.state.showModal} onHide={this.closeChat} style={{zIndex: "999999", width: "auto"}}>
+					<Modal show={this.state.showModal} onHide={this.closeChat} style={{zIndex: "999999"}}>
 						<Modal.Header closeButton>
 						<Modal.Title>Chat Room</Modal.Title>
 						</Modal.Header>
