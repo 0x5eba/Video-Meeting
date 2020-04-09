@@ -18,7 +18,7 @@ import 'bootstrap/dist/css/bootstrap.css';
 import "./Video.css"
 
 // questo link e' eseguito con ngrok http 3000, quindi un ngrok solo per la porta 3000, e un altro per 3001 dove c'e' l'app
-const server_url = process.env.NODE_ENV === 'production' ? 'https://video.sebastienbiollo.com:444' : "http://localhost:4001"
+const server_url = process.env.NODE_ENV === 'production' ? 'https://video.sebastienbiollo.com' : "http://localhost:4001"
 
 var connections = {}
 const peerConnectionConfig = {
