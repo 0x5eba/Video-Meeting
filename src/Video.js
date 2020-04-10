@@ -429,10 +429,30 @@ class Video extends Component {
 		}, () => {})
 	}
 
+	copyUrl = (e) => {
+		const el = document.createElement('textarea')
+		el.value = window.location.href
+		document.body.appendChild(el)
+		el.select()
+		document.execCommand('copy')
+		document.body.removeChild(el)
+	}
+
 	render() {
 		return (
 			<div>
 				<div className="container">
+
+					<div style={{paddingTop: "20px"}}>
+						<Input value={window.location.href} disable></Input>
+						<Button style={{ 
+							backgroundColor: "#3f51b5", 
+							color: "whitesmoke", 
+							marginLeft: "20px", 
+							marginTop: "10px",
+							width: "110px",
+							fontSize: "10px"}} onClick={this.copyUrl}>Copy invite link</Button>
+					</div>
 					
 					<Row id="main" className="flex-container">
 						<video id="my-video" ref={this.localVideoref} autoPlay muted></video>
