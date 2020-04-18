@@ -12,6 +12,8 @@ import StopScreenShareIcon from '@material-ui/icons/StopScreenShare';
 import CallEndIcon from '@material-ui/icons/CallEnd';
 import ChatIcon from '@material-ui/icons/Chat';
 
+import { message } from 'antd';
+
 import { Container, Row, Col} from 'reactstrap';
 import Modal from 'react-bootstrap/Modal'
 import 'bootstrap/dist/css/bootstrap.css';
@@ -430,73 +432,88 @@ class Video extends Component {
 	}
 
 	copyUrl = (e) => {
-		const el = document.createElement('textarea')
-		el.value = window.location.href
-		document.body.appendChild(el)
-		el.select()
-		document.execCommand('copy')
-		document.body.removeChild(el)
+		var text = window.location.href
+
+		if (!navigator.clipboard) {
+			var textArea = document.createElement("textarea")
+			textArea.value = text
+			document.body.appendChild(textArea)
+			textArea.focus()
+			textArea.select()
+			try {
+				var successful = document.execCommand('copy');
+				var msg = successful ? 'successful' : 'unsuccessful';
+				console.log(msg)
+				message.success("Link copied to clipboard!")
+			} catch (err) {
+				message.error("Failed to copy")
+			}
+			document.body.removeChild(textArea)
+			return
+		}
+		navigator.clipboard.writeText(text).then(function () {
+			message.success("Link copied to clipboard!")
+		}, function (err) {
+			message.error("Failed to copy")
+		})
 	}
 
 	render() {
 		return (
-			<div>
-				<div className="container">
-
-					<div style={{paddingTop: "20px"}}>
-						<Input value={window.location.href} disable></Input>
-						<Button style={{ 
-							backgroundColor: "#3f51b5", 
-							color: "whitesmoke", 
-							marginLeft: "20px", 
-							marginTop: "10px",
-							width: "110px",
-							fontSize: "10px"}} onClick={this.copyUrl}>Copy invite link</Button>
-					</div>
-					
-					<Row id="main" className="flex-container">
-						<video id="my-video" ref={this.localVideoref} autoPlay muted></video>
-					</Row>
-
-					<div className="btn-down">
-						<IconButton style={{ color: "#424242" }} onClick={this.handleVideo}>
-							{(this.state.video === true) ? <VideocamIcon /> : <VideocamOffIcon />}
-						</IconButton>
-
-						<IconButton style={{ color: "#f44336" }} onClick={this.handleEndCall}>
-							<CallEndIcon />
-						</IconButton>
-
-						<IconButton style={{ color: "#424242" }} onClick={this.handleAudio}>
-							{this.state.audio === true ? <MicIcon /> : <MicOffIcon />}
-						</IconButton>
-
-						{this.state.screenAvailable === true ?
-							<IconButton style={{ color: "#424242" }} onClick={this.handleScreen}>
-								{this.state.screen === true ? <ScreenShareIcon /> : <StopScreenShareIcon />}
-							</IconButton>
-						: null }
-
-						<IconButton style={{ color: "#424242" }} onClick={this.openChat}>
-							<ChatIcon />
-						</IconButton>
-					</div>
-
-					<Modal show={this.state.showModal} onHide={this.closeChat} style={{zIndex: "999999"}}>
-						<Modal.Header closeButton>
-						<Modal.Title>Chat Room</Modal.Title>
-						</Modal.Header>
-						<Modal.Body style={{overflow: "auto", overflowY: "auto", height: "500px"}} >
-							{this.state.messages.length > 0 ? this.state.messages.map((item) => (
-								<div><b>{item.sender}</b><p style={{ wordBreak: "break-all"}}>{item.data}</p></div>
-							)) : <p>No message yet</p>}
-						</Modal.Body>
-						<Modal.Footer className="div-send-msg">
-							<Input placeholder="Message" value={this.state.message} onChange={e => this.handleMessage(e)} />
-							<Button variant="contained" color="primary" onClick={this.sendMessage}>Send</Button>
-						</Modal.Footer>
-					</Modal>
+			<div className="container">
+				<div style={{paddingTop: "20px"}}>
+					<Input value={window.location.href} disable></Input>
+					<Button style={{ 
+						backgroundColor: "#3f51b5", 
+						color: "whitesmoke", 
+						marginLeft: "20px", 
+						marginTop: "10px",
+						width: "110px",
+						fontSize: "10px"}} onClick={this.copyUrl}>Copy invite link</Button>
 				</div>
+				
+				<Row id="main" className="flex-container">
+					<video id="my-video" ref={this.localVideoref} autoPlay muted></video>
+				</Row>
+
+				<div className="btn-down">
+					<IconButton style={{ color: "#424242" }} onClick={this.handleVideo}>
+						{(this.state.video === true) ? <VideocamIcon /> : <VideocamOffIcon />}
+					</IconButton>
+
+					<IconButton style={{ color: "#f44336" }} onClick={this.handleEndCall}>
+						<CallEndIcon />
+					</IconButton>
+
+					<IconButton style={{ color: "#424242" }} onClick={this.handleAudio}>
+						{this.state.audio === true ? <MicIcon /> : <MicOffIcon />}
+					</IconButton>
+
+					{this.state.screenAvailable === true ?
+						<IconButton style={{ color: "#424242" }} onClick={this.handleScreen}>
+							{this.state.screen === true ? <ScreenShareIcon /> : <StopScreenShareIcon />}
+						</IconButton>
+					: null }
+
+					<IconButton style={{ color: "#424242" }} onClick={this.openChat}>
+						<ChatIcon />
+					</IconButton>
+				</div>
+
+				<Modal show={this.state.showModal} onHide={this.closeChat} style={{zIndex: "999999"}}>
+					<Modal.Header closeButton>
+					<Modal.Title>Chat Room</Modal.Title>
+					</Modal.Header>
+					<Modal.Body style={{overflow: "auto", overflowY: "auto", height: "500px"}} >
+						{this.state.messages.length > 0 ? this.state.messages.map((item) => (
+							<div><b>{item.sender}</b><p style={{ wordBreak: "break-all"}}>{item.data}</p></div>
+						)) : <p>No message yet</p>}
+					</Modal.Body>
+					<Modal.Footer className="div-send-msg">
+						<Input placeholder="Message" value={this.state.message} onChange={e => this.handleMessage(e)} />
+						<Button variant="contained" color="primary" onClick={this.sendMessage}>Send</Button>
+					</Modal.Footer>
+				</Modal>
 			</div>
 		)
 	}
