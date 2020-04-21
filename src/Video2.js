@@ -15,7 +15,7 @@ import ChatIcon from '@material-ui/icons/Chat';
 import { message } from 'antd';
 import 'antd/dist/antd.css'
 
-import { Row } from 'reactstrap';
+import { Container, Row, Col} from 'reactstrap';
 import Modal from 'react-bootstrap/Modal'
 import 'bootstrap/dist/css/bootstrap.css';
 import "./Video.css"
@@ -33,9 +33,7 @@ const peerConnectionConfig = {
 var socket = null
 var socketId = null
 
-var elms = 0
-
-class Video extends Component {
+class Video2 extends Component {
 	constructor(props) {
 		super(props)
 
@@ -55,7 +53,9 @@ class Video extends Component {
 			showModal: false,
 			screenAvailable: false,
 			messages: [],
-			message: "",
+            message: "",
+            
+            videos: [],
 		}
 
 		this.addMessage = this.addMessage.bind(this);
@@ -137,6 +137,8 @@ class Video extends Component {
 		window.localStream = stream
 		this.localVideoref.current.srcObject = stream
 
+		console.log("getUserMediaSuccess")
+
 		// stream.getVideoTracks()[0].onended = () => {
 		//   console.log("video / audio false")
 		//   this.setState({ 
@@ -158,7 +160,7 @@ class Video extends Component {
 			}
 
 			if (navigator.mediaDevices.getDisplayMedia) {
-				navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
+				navigator.mediaDevices.getDisplayMedia({ video: true })
 					.then(this.getDislayMediaSuccess)
 					.then((stream) => {
 						var main = document.getElementById('main')
@@ -182,6 +184,8 @@ class Video extends Component {
 
 		stream.getVideoTracks()[0].onended = () => {
 			this.setState({
+				video: this.state.video,
+				audio: this.state.audio,
 				screen: false,
 			}, () => {
 				try {
@@ -191,32 +195,14 @@ class Video extends Component {
 					console.log(e)
 				}
 
-				let silence = () => {
-					let ctx = new AudioContext()
-					let oscillator = ctx.createOscillator()
-					let dst = oscillator.connect(ctx.createMediaStreamDestination())
-					oscillator.start()
-					ctx.resume()
-					return Object.assign(dst.stream.getAudioTracks()[0], {enabled: false});
-				}
-				
-				let black = ({width = 640, height = 480} = {}) => {
-					let canvas = Object.assign(document.createElement("canvas"), {width, height});
-					canvas.getContext('2d').fillRect(0, 0, width, height);
-					let stream = canvas.captureStream();
-					return Object.assign(stream.getVideoTracks()[0], {enabled: false});
-				}
-				
-				let blackSilence = (...args) => new MediaStream([black(...args), silence()]);
-				window.localStream = blackSilence()
-
-				// this.getUserMedia()
+				this.getUserMedia()
 			})
 		};
 	}
 
 
 	gotMessageFromServer = (fromId, message) => {
+		//Parse the incoming signal
 		var signal = JSON.parse(message)
 
 		//Make sure it's not coming from yourself
@@ -326,13 +312,11 @@ class Video extends Component {
 							var video = document.createElement('video')
 							video.style.minWidth = "30%"
 							video.style.minHeight = "30%"
-							video.style.maxHeight = "100%"
 							video.style.setProperty("width", width)
 							video.style.setProperty("height", height)
 							video.style.margin = "10px"
 							video.style.borderStyle = "solid"
-							video.style.borderColor = "#bdbdbd"
-							video.style.objectFit = "fill"
+							video.style.borderColor = "#424242"
 
 							video.setAttribute('data-socket', socketListId);
 							video.srcObject = event.stream
@@ -345,16 +329,13 @@ class Video extends Component {
 
 						//Add the local video stream
 						if (window.localStream !== undefined && window.localStream !== null) {
-							console.log("addStream video")
 							connections[socketListId].addStream(window.localStream);
 						} else {
 
 							let silence = () => {
-								let ctx = new AudioContext()
-								let oscillator = ctx.createOscillator()
-								let dst = oscillator.connect(ctx.createMediaStreamDestination())
-								oscillator.start()
-								ctx.resume()
+								let ctx = new AudioContext(), oscillator = ctx.createOscillator();
+								let dst = oscillator.connect(ctx.createMediaStreamDestination());
+								oscillator.start();
 								return Object.assign(dst.stream.getAudioTracks()[0], {enabled: false});
 							}
 							
@@ -366,10 +347,8 @@ class Video extends Component {
 							}
 							
 							let blackSilence = (...args) => new MediaStream([black(...args), silence()]);
-							window.localStream = blackSilence()
 							
-							console.log("addStream silence")
-							connections[socketListId].addStream(window.localStream);
+							connections[socketListId].addStream(blackSilence());
 						}
 					}
 				});
@@ -526,7 +505,7 @@ class Video extends Component {
 				
 				<div className="container">
 					<div style={{paddingTop: "20px"}}>
-						<Input value={window.location.href} disable="true"></Input>
+						<Input value={window.location.href} disable></Input>
 						<Button style={{ 
 							backgroundColor: "#3f51b5", 
 							color: "whitesmoke", 
@@ -536,19 +515,19 @@ class Video extends Component {
 							fontSize: "10px"}} onClick={this.copyUrl}>Copy invite link</Button>
 					</div>
 					
-					<Row id="main" className="flex-container">
+					<Col id="main" className="flex-container">
 						<video id="my-video" ref={this.localVideoref} autoPlay muted style={{
 							borderStyle: "solid",
-							borderColor: "#bdbdbd",
+							borderColor: "#424242",
 							margin: "10px", 
 							objectFit: "fill",
 							width: "100%", 
-							height: "100%"}}></video>
-					</Row>
+							height: "100%",}}></video>
+					</Col>
 				</div>
 			</div>
 		)
 	}
 }
 
-export default Video;
+export default Video2;
