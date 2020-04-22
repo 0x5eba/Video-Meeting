@@ -109,7 +109,7 @@ class Video extends Component {
 			// if (socket !== null) {
 			// 	socket.disconnect()
 			// }
-			
+
 			navigator.mediaDevices.getUserMedia({ video: this.state.video, audio: this.state.audio })
 				.then(this.getUserMediaSuccess)
 				.then((stream) => {
@@ -186,6 +186,19 @@ class Video extends Component {
 				
 				let blackSilence = (...args) => new MediaStream([black(...args), silence()]);
 				window.localStream = blackSilence()
+				this.localVideoref.current.srcObject = window.localStream
+
+				for(let id in connections){
+					connections[id].addStream(window.localStream);
+		
+					connections[id].createOffer().then((description) => {
+						connections[id].setLocalDescription(description)
+							.then(() => {
+								socket.emit('signal', id, JSON.stringify({ 'sdp': connections[id].localDescription }));
+							})
+							.catch(e => console.log(e));
+					});
+				}
 			})
 		};
 	}
@@ -273,6 +286,7 @@ class Video extends Component {
 				
 				let blackSilence = (...args) => new MediaStream([black(...args), silence()]);
 				window.localStream = blackSilence()
+				this.localVideoref.current.srcObject = window.localStream
 
 				this.getUserMedia()
 			})
@@ -474,19 +488,27 @@ class Video extends Component {
 							let blackSilence = (...args) => new MediaStream([black(...args), silence()]);
 							window.localStream = blackSilence()
 							connections[socketListId].addStream(window.localStream);
+
+							connections[socketListId].createOffer().then((description) => {
+								connections[socketListId].setLocalDescription(description)
+									.then(() => {
+										socket.emit('signal', socketListId, JSON.stringify({ 'sdp': connections[socketListId].localDescription }));
+									})
+									.catch(e => console.log(e));
+							});
 						}
 					}
 				});
 
 				
 				//Create an offer to connect with your local description
-				connections[id].createOffer().then((description) => {
-					connections[id].setLocalDescription(description)
-						.then(() => {
-							socket.emit('signal', id, JSON.stringify({ 'sdp': connections[id].localDescription }));
-						})
-						.catch(e => console.log(e));
-				});
+				// connections[id].createOffer().then((description) => {
+				// 	connections[id].setLocalDescription(description)
+				// 		.then(() => {
+				// 			socket.emit('signal', id, JSON.stringify({ 'sdp': connections[id].localDescription }));
+				// 		})
+				// 		.catch(e => console.log(e));
+				// });
 			});
 		})
 	}
