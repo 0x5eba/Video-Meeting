@@ -492,13 +492,13 @@ class Video extends Component {
 							window.localStream = blackSilence()
 							connections[socketListId].addStream(window.localStream);
 
-							// connections[socketListId].createOffer().then((description) => {
-							// 	connections[socketListId].setLocalDescription(description)
-							// 		.then(() => {
-							// 			socket.emit('signal', socketListId, JSON.stringify({ 'sdp': connections[socketListId].localDescription }));
-							// 		})
-							// 		.catch(e => console.log(e));
-							// });
+							connections[socketListId].createOffer().then((description) => {
+								connections[socketListId].setLocalDescription(description)
+									.then(() => {
+										socket.emit('signal', socketListId, JSON.stringify({ 'sdp': connections[socketListId].localDescription }));
+									})
+									.catch(e => console.log(e));
+							});
 						}
 					}
 				});
