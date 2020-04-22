@@ -18,6 +18,9 @@ class Home extends Component {
 
 	join = () => {
 		if(this.state.url !== ""){
+			if(this.state.url.includes(window.location.href)){
+				window.location.href = this.state.url
+			}
 			window.location.href = `/${this.state.url}`
 		}
 	}
