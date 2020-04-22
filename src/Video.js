@@ -109,6 +109,7 @@ class Video extends Component {
 			// if (socket !== null) {
 			// 	socket.disconnect()
 			// }
+			
 			navigator.mediaDevices.getUserMedia({ video: this.state.video, audio: this.state.audio })
 				.then(this.getUserMediaSuccess)
 				.then((stream) => {
@@ -134,6 +135,12 @@ class Video extends Component {
 	}
 
 	getUserMediaSuccess = (stream) => {
+		try {
+			window.localStream.getTracks().forEach(track => track.stop())
+		} catch (e) {
+			console.log(e)
+		}
+
 		window.localStream = stream
 		this.localVideoref.current.srcObject = stream
 
@@ -210,6 +217,12 @@ class Video extends Component {
 	}
 
 	getDislayMediaSuccess = (stream) => {
+		try {
+			window.localStream.getTracks().forEach(track => track.stop())
+		} catch (e) {
+			console.log(e)
+		}
+
 		window.localStream = stream
 		this.localVideoref.current.srcObject = stream
 
@@ -322,10 +335,10 @@ class Video extends Component {
 						minWidth = "300px"
 					}
 
-					var minHeight = "30%"
-					if((heightMain*30/100) < 300){
-						minHeight = "300px"
-					}
+					var minHeight = "40%"
+					// if((heightMain*30/100) < 300){
+					// 	minHeight = "300px"
+					// }
 					
 					var height = String(100/elms) + "%"
 					var width = ""
@@ -388,10 +401,10 @@ class Video extends Component {
 									minWidth = "300px"
 								}
 
-								var minHeight = "30%"
-								if((heightMain*30/100) < 300){
-									minHeight = "300px"
-								}
+								var minHeight = "40%"
+								// if((heightMain*30/100) < 300){
+								// 	minHeight = "300px"
+								// }
 								
 								var height = String(100/elms) + "%"
 								var width = ""
