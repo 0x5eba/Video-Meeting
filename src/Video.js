@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import io from 'socket.io-client'
 import IconButton from '@material-ui/core/IconButton';
+import Badge from '@material-ui/core/Badge';
 import { Input, Button } from '@material-ui/core';
 
 import VideocamIcon from '@material-ui/icons/Videocam';
@@ -56,7 +57,9 @@ class Video extends Component {
 			screenAvailable: false,
 			messages: [],
 			message: "",
+			newmessages: 0,
 		}
+		connections = {}
 
 		this.addMessage = this.addMessage.bind(this)
 
@@ -190,7 +193,7 @@ class Video extends Component {
 
 				for(let id in connections){
 					connections[id].addStream(window.localStream);
-		
+					
 					connections[id].createOffer().then((description) => {
 						connections[id].setLocalDescription(description)
 							.then(() => {
@@ -342,7 +345,7 @@ class Video extends Component {
 					var videos = main.querySelectorAll("video")
 
 					var widthMain = main.offsetWidth
-					var heightMain = main.offsetHeight
+					// var heightMain = main.offsetHeight
 
 					var minWidth = "30%"
 					if((widthMain*30/100) < 300){
@@ -408,7 +411,7 @@ class Video extends Component {
 								var videos = main.querySelectorAll("video")
 
 								var widthMain = main.offsetWidth
-								var heightMain = main.offsetHeight
+								// var heightMain = main.offsetHeight
 
 								var minWidth = "30%"
 								if((widthMain*30/100) < 300){
@@ -489,26 +492,26 @@ class Video extends Component {
 							window.localStream = blackSilence()
 							connections[socketListId].addStream(window.localStream);
 
-							connections[socketListId].createOffer().then((description) => {
-								connections[socketListId].setLocalDescription(description)
-									.then(() => {
-										socket.emit('signal', socketListId, JSON.stringify({ 'sdp': connections[socketListId].localDescription }));
-									})
-									.catch(e => console.log(e));
-							});
+							// connections[socketListId].createOffer().then((description) => {
+							// 	connections[socketListId].setLocalDescription(description)
+							// 		.then(() => {
+							// 			socket.emit('signal', socketListId, JSON.stringify({ 'sdp': connections[socketListId].localDescription }));
+							// 		})
+							// 		.catch(e => console.log(e));
+							// });
 						}
 					}
 				});
 
 				
-				//Create an offer to connect with your local description
-				// connections[id].createOffer().then((description) => {
-				// 	connections[id].setLocalDescription(description)
-				// 		.then(() => {
-				// 			socket.emit('signal', id, JSON.stringify({ 'sdp': connections[id].localDescription }));
-				// 		})
-				// 		.catch(e => console.log(e));
-				// });
+				// Create an offer to connect with your local description
+				connections[id].createOffer().then((description) => {
+					connections[id].setLocalDescription(description)
+						.then(() => {
+							socket.emit('signal', id, JSON.stringify({ 'sdp': connections[id].localDescription }));
+						})
+						.catch(e => console.log(e));
+				});
 			});
 		})
 	}
@@ -554,6 +557,7 @@ class Video extends Component {
 	openChat = () => {
 		this.setState({
 			showModal: true,
+			newmessages: 0,
 		}, () => {})
 	}
 
@@ -571,8 +575,15 @@ class Video extends Component {
 
 	addMessage = (data, sender) => {
 		this.setState(prevState => ({
-			messages: [...prevState.messages, {"sender": sender, "data": data}]
+			messages: [...prevState.messages, {"sender": sender, "data": data}],
 		}))
+
+		if(sender !== socketId){
+			this.setState({
+				newmessages: this.state.newmessages + 1
+			})
+		}
+		
 	}
 
 	sendMessage = () => {
@@ -592,8 +603,7 @@ class Video extends Component {
 			textArea.focus()
 			textArea.select()
 			try {
-				var successful = document.execCommand('copy');
-				var msg = successful ? 'successful' : 'unsuccessful';
+				document.execCommand('copy')
 				message.success("Link copied to clipboard!")
 			} catch (err) {
 				message.error("Failed to copy")
@@ -629,10 +639,12 @@ class Video extends Component {
 							{this.state.screen === true ? <ScreenShareIcon /> : <StopScreenShareIcon />}
 						</IconButton>
 					: null }
-
-					<IconButton style={{ color: "#424242" }} onClick={this.openChat}>
-						<ChatIcon />
-					</IconButton>
+					
+					<Badge badgeContent={this.state.newmessages} max={999} color="secondary" onClick={this.openChat}>
+						<IconButton style={{ color: "#424242" }} onClick={this.openChat}>
+							<ChatIcon />
+						</IconButton> 
+					</Badge>
 				</div>
 
 				<Modal show={this.state.showModal} onHide={this.closeChat} style={{zIndex: "999999"}}>
@@ -661,7 +673,7 @@ class Video extends Component {
 							color: "whitesmoke", 
 							marginLeft: "20px", 
 							marginTop: "10px",
-							width: "110px",
+							width: "120px",
 							fontSize: "10px"}} onClick={this.copyUrl}>Copy invite link</Button>
 					</div>
 					
