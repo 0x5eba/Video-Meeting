@@ -4,8 +4,8 @@ body {
 
 .flex-container {
     height: calc(100% - 150px);
-    width: 90%;
-    margin: 0 auto;
+    width: 100%;
+    /* margin: 0 auto; */
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -31,7 +31,7 @@ body {
 }
 
 .btn-down {
-    z-index: 9999;
+    z-index: 2;
     position: fixed; 
     bottom: 0px;
     width: 100%;
