@@ -18,32 +18,29 @@ class Home extends Component {
 
 	join = () => {
 		if(this.state.url !== ""){
-			if(this.state.url.includes(window.location.href)){
+			if(this.state.url.includes(window.location.href) || this.state.url.includes(window.location.href.substring(8, window.location.href.length))){
 				window.location.href = this.state.url
 			}
 			window.location.href = `/${this.state.url}`
-		}
-	}
-
-	create = () => {
-		if(this.state.url === ""){
+		} else {
 			var url = Math.random().toString(36).substring(2, 7)
 			window.location.href = `/${url}`
-		} else {
-			window.location.href = `/${this.state.url}`
 		}
 	}
 
 	render() {
 		return (
 			<div className="container2">
-				<Input placeholder="URL" onChange={e => this.handleChange(e)} />
 				<div>
-					<Button variant="contained" color="primary" onClick={this.join} style={{ margin: "20px" }}>
-						Join call</Button>
-					<Button variant="contained" style={{ backgroundColor: "#4caf50", margin: "20px" }}
-						onClick={this.create}>
-						Create call</Button>
+					<h1 style={{fontSize: "45px"}}>Video Meeting</h1>
+					<p style={{fontWeight: "200"}}>Real-time peer-to-peer meetings, with also screen sharing, to have a lot of fun with friends</p>
+				</div>
+
+				<div style={{background: "white", width: "30%", height: "auto", padding: "20px", minWidth: "400px",
+					textAlign: "center", margin: "auto", marginTop: "100px"}}>
+					<p style={{margin: 0, fontWeight: "bold", paddingRight: "50px"}}>Start or join a meeting</p>
+					<Input placeholder="URL" onChange={e => this.handleChange(e)} />
+					<Button variant="contained" color="primary" onClick={this.join} style={{ margin: "20px" }}>Go</Button>
 				</div>
 			</div>
 		)
