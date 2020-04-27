@@ -1,8 +1,15 @@
 {
   "short_name": "Video Meeting",
   "name": "Video Meeting",
-  "start_url": ".",
+  "start_url": "https://video.sebastienbiollo.com",
   "display": "standalone",
   "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "background_color": "#ffffff",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ]
 }
