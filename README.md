@@ -5,7 +5,7 @@ Google Meet / Zoom clone in a few lines of code.
 Video Meeting is a video conference website that lets you stay in touch with all your friends.
 
 
-### Demo
+### Website
 Try Video Meeting here [video.sebastienbiollo.com](https://video.sebastienbiollo.com)
 
 
