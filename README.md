@@ -4,8 +4,10 @@ Google Meet / Zoom clone in a few lines of code.
 
 Video is a video conference website that lets you stay in touch with all your friends.
 
+Try it here: [video.sebastienbiollo.com](https://video.sebastienbiollo.com)
+
 Key features:
-- Is 100% Free
+- Is 100% free and open-source
 - No account needed
 - Unlimited users
 - Chat and video in real-time
