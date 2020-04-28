@@ -33,7 +33,7 @@ class Home extends Component {
 			<div className="container2">
 				<div>
 					<h1 style={{fontSize: "45px"}}>Video Meeting</h1>
-					<p style={{fontWeight: "200"}}>Real-time peer-to-peer meetings, with also screen sharing, to have a lot of fun with friends</p>
+					<p style={{fontWeight: "200"}}>Video conference website that lets you stay in touch with all your friends.</p>
 				</div>
 
 				<div style={{background: "white", width: "30%", height: "auto", padding: "20px", minWidth: "400px",
