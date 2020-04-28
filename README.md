@@ -5,11 +5,11 @@ Google Meet / Zoom clone in a few lines of code.
 Video is a video conference website that lets you stay in touch with all your friends.
 
 
-## Demo
+### Demo
 Try it here: [video.sebastienbiollo.com](https://video.sebastienbiollo.com)
 
 
-## Features
+### Features
 - Is 100% free and open-source
 - No account needed
 - Unlimited users
