@@ -21,7 +21,6 @@ import Modal from 'react-bootstrap/Modal'
 import 'bootstrap/dist/css/bootstrap.css';
 import "./Video.css"
 
-// questo link e' eseguito con ngrok http 3000, quindi un ngrok solo per la porta 3000, e un altro per 3001 dove c'e' l'app
 const server_url = process.env.NODE_ENV === 'production' ? 'https://video.sebastienbiollo.com' : "http://localhost:4001"
 
 var connections = {}
@@ -109,22 +108,9 @@ class Video extends Component {
 
 	getUserMedia = () => {
 		if ((this.state.video && this.videoAvailable) || (this.state.audio && this.audioAvailable)) {
-			// if (socket !== null) {
-			// 	socket.disconnect()
-			// }
-
 			navigator.mediaDevices.getUserMedia({ video: this.state.video, audio: this.state.audio })
 				.then(this.getUserMediaSuccess)
 				.then((stream) => {
-					// var main = document.getElementById('main')
-					// var videos = main.querySelectorAll("video")
-					// for(let a = 0; a < videos.length; ++a){
-					// 	if(videos[a].id !== "my-video"){
-					// 		videos[a].parentNode.removeChild(videos[a])
-					// 	}
-					// }
-
-					// this.connectToSocketServer()
 				})
 				.catch((e) => console.log(e))
 		} else {
@@ -209,23 +195,10 @@ class Video extends Component {
 
 	getDislayMedia = () => {
 		if (this.state.screen) {
-			// if (socket !== null) {
-			// 	socket.disconnect()
-			// }
-
 			if (navigator.mediaDevices.getDisplayMedia) {
 				navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
 					.then(this.getDislayMediaSuccess)
 					.then((stream) => {
-						// var main = document.getElementById('main')
-						// var videos = main.querySelectorAll("video")
-						// for(let a = 0; a < videos.length; ++a){
-						// 	if(videos[a].id !== "my-video"){
-						// 		videos[a].parentNode.removeChild(videos[a])
-						// 	}
-						// }
-
-						// this.connectToSocketServer()
 					})
 					.catch((e) => console.log(e))
 			}
@@ -241,11 +214,6 @@ class Video extends Component {
 
 		window.localStream = stream
 		this.localVideoref.current.srcObject = stream
-
-		// var socket2 = io.connect(server_url);
-		// socket2.on('connect', () => {
-		// 	console.log("connect", socketId, socket2.id)
-		// })
 
 		for(let id in connections){
 			connections[id].addStream(window.localStream);
@@ -321,17 +289,15 @@ class Video extends Component {
 	}
 
 	connectToSocketServer = () => {
-		socket = io.connect(server_url);
+		socket = io.connect(server_url)
 
-		socket.on('signal', this.gotMessageFromServer);
+		socket.on('signal', this.gotMessageFromServer)
 
 		socket.on('connect', () => {
 
 			console.log("connected")
-
-			socket.emit('join-call', window.location.href);
-
-			socketId = socket.id;
+			socket.emit('join-call', window.location.href)
+			socketId = socket.id
 
 			socket.on('chat-message', this.addMessage)
 
@@ -345,7 +311,6 @@ class Video extends Component {
 					var videos = main.querySelectorAll("video")
 
 					var widthMain = main.offsetWidth
-					// var heightMain = main.offsetHeight
 
 					var minWidth = "30%"
 					if((widthMain*30/100) < 300){
@@ -353,9 +318,6 @@ class Video extends Component {
 					}
 
 					var minHeight = "40%"
-					// if((heightMain*30/100) < 300){
-					// 	minHeight = "300px"
-					// }
 					
 					var height = String(100/elms) + "%"
 					var width = ""
@@ -382,8 +344,6 @@ class Video extends Component {
 			socket.on('user-joined', function (id, clients) {
 				console.log("joined")
 
-				// connections = {} // TODO eh, una merda, ma non so come fare
-				
 				clients.forEach(function (socketListId) {
 					if (connections[socketListId] === undefined) {
 						console.log("new entry")
@@ -411,7 +371,6 @@ class Video extends Component {
 								var videos = main.querySelectorAll("video")
 
 								var widthMain = main.offsetWidth
-								// var heightMain = main.offsetHeight
 
 								var minWidth = "30%"
 								if((widthMain*30/100) < 300){
@@ -419,9 +378,6 @@ class Video extends Component {
 								}
 
 								var minHeight = "40%"
-								// if((heightMain*30/100) < 300){
-								// 	minHeight = "300px"
-								// }
 								
 								var height = String(100/elms) + "%"
 								var width = ""
@@ -491,14 +447,6 @@ class Video extends Component {
 							let blackSilence = (...args) => new MediaStream([black(...args), silence()]);
 							window.localStream = blackSilence()
 							connections[socketListId].addStream(window.localStream);
-
-							// connections[socketListId].createOffer().then((description) => {
-							// 	connections[socketListId].setLocalDescription(description)
-							// 		.then(() => {
-							// 			socket.emit('signal', socketListId, JSON.stringify({ 'sdp': connections[socketListId].localDescription }));
-							// 		})
-							// 		.catch(e => console.log(e));
-							// });
 						}
 					}
 				});
