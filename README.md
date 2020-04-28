@@ -6,7 +6,7 @@ Video Meeting is a video conference website that lets you stay in touch with all
 
 
 ### Demo
-Try it here: [video.sebastienbiollo.com](https://video.sebastienbiollo.com)
+Try Video Meeting here [video.sebastienbiollo.com](https://video.sebastienbiollo.com)
 
 
 ### Features
