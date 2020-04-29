@@ -439,16 +439,9 @@ class Video extends Component {
 							}
 						}
 
-						// connections[socketListId].addStream(window.localStream);
-						
-						//Add the local video stream
-						if (window.localStream !== undefined && window.localStream !== null) {
-							console.log("addStream video")
+						try {
 							connections[socketListId].addStream(window.localStream);
-						} else {
-
-							console.log("addStream silence")
-
+						} catch(e) {
 							let silence = () => {
 								let ctx = new AudioContext()
 								let oscillator = ctx.createOscillator()
@@ -469,6 +462,35 @@ class Video extends Component {
 							window.localStream = blackSilence()
 							connections[socketListId].addStream(window.localStream);
 						}
+						
+						// //Add the local video stream
+						// if (window.localStream !== undefined && window.localStream !== null) {
+						// 	console.log("addStream video")
+						// 	connections[socketListId].addStream(window.localStream);
+						// } else {
+
+						// 	console.log("addStream silence")
+
+						// 	let silence = () => {
+						// 		let ctx = new AudioContext()
+						// 		let oscillator = ctx.createOscillator()
+						// 		let dst = oscillator.connect(ctx.createMediaStreamDestination())
+						// 		oscillator.start()
+						// 		ctx.resume()
+						// 		return Object.assign(dst.stream.getAudioTracks()[0], {enabled: false});
+						// 	}
+							
+						// 	let black = ({width = 640, height = 480} = {}) => {
+						// 		let canvas = Object.assign(document.createElement("canvas"), {width, height});
+						// 		canvas.getContext('2d').fillRect(0, 0, width, height);
+						// 		let stream = canvas.captureStream();
+						// 		return Object.assign(stream.getVideoTracks()[0], {enabled: false});
+						// 	}
+							
+						// 	let blackSilence = (...args) => new MediaStream([black(...args), silence()]);
+						// 	window.localStream = blackSilence()
+						// 	connections[socketListId].addStream(window.localStream);
+						// }
 					}
 				});
 
