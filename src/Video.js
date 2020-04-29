@@ -88,7 +88,7 @@ class Video extends Component {
 			video: this.video,
 			audio: this.audio,
 			screen: this.screen
-		}, () => {
+		}, async () => {
 			await this.getUserMedia()
 			await this.connectToSocketServer()
 		})
