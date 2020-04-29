@@ -26,7 +26,7 @@ const server_url = process.env.NODE_ENV === 'production' ? 'https://video.sebast
 var connections = {}
 const peerConnectionConfig = {
 	'iceServers': [
-		{ 'urls': 'stun:stun.services.mozilla.com' },
+		// { 'urls': 'stun:stun.services.mozilla.com' },
 		{ 'urls': 'stun:stun.l.google.com:19302' },
 	]
 }
@@ -61,19 +61,7 @@ class Video extends Component {
 		connections = {}
 
 		this.addMessage = this.addMessage.bind(this)
-
 		this.getMedia()
-		// this.test()
-	}
-
-	test = () => {
-		if(navigator.mediaDevices.getUserMedia) {
-			navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-				.then(this.getUserMediaSuccess)
-				.then(() => {
-					this.connectToSocketServer()
-				}); 
-		}
 	}
 
 	getMedia = async () => {
@@ -144,21 +132,21 @@ class Video extends Component {
 		window.localStream = stream
 		this.localVideoref.current.srcObject = stream
 
-		for(let id in connections){
-			if(id === socketId){
-				continue
-			}
+		// for(let id in connections){
+		// 	if(id === socketId){
+		// 		continue
+		// 	}
 
-			connections[id].addStream(window.localStream);
+		// 	connections[id].addStream(window.localStream);
 
-			connections[id].createOffer().then((description) => {
-				connections[id].setLocalDescription(description)
-					.then(() => {
-						socket.emit('signal', id, JSON.stringify({ 'sdp': connections[id].localDescription }));
-					})
-					.catch(e => console.log(e));
-			});
-		}
+		// 	connections[id].createOffer().then((description) => {
+		// 		connections[id].setLocalDescription(description)
+		// 			.then(() => {
+		// 				socket.emit('signal', id, JSON.stringify({ 'sdp': connections[id].localDescription }));
+		// 			})
+		// 			.catch(e => console.log(e));
+		// 	});
+		// }
 
 		// stream.getVideoTracks()[0].onended = () => {
 		// 	this.setState({ 
@@ -230,21 +218,21 @@ class Video extends Component {
 		window.localStream = stream
 		this.localVideoref.current.srcObject = stream
 
-		for(let id in connections){
-			if(id === socketId){
-				continue
-			}
+		// for(let id in connections){
+		// 	if(id === socketId){
+		// 		continue
+		// 	}
 
-			connections[id].addStream(window.localStream);
+		// 	connections[id].addStream(window.localStream);
 
-			connections[id].createOffer().then((description) => {
-				connections[id].setLocalDescription(description)
-					.then(() => {
-						socket.emit('signal', id, JSON.stringify({ 'sdp': connections[id].localDescription }));
-					})
-					.catch(e => console.log(e));
-			});
-		}
+		// 	connections[id].createOffer().then((description) => {
+		// 		connections[id].setLocalDescription(description)
+		// 			.then(() => {
+		// 				socket.emit('signal', id, JSON.stringify({ 'sdp': connections[id].localDescription }));
+		// 			})
+		// 			.catch(e => console.log(e));
+		// 	});
+		// }
 		
 
 		// stream.getVideoTracks()[0].onended = () => {
@@ -287,7 +275,6 @@ class Video extends Component {
 	gotMessageFromServer = (fromId, message) => {
 		var signal = JSON.parse(message)
 
-		//Make sure it's not coming from yourself
 		if (fromId !== socketId) {
 			if (signal.sdp) {
 				connections[fromId].setRemoteDescription(new RTCSessionDescription(signal.sdp)).then(() => {
@@ -308,7 +295,7 @@ class Video extends Component {
 	}
 
 	connectToSocketServer = () => {
-		socket = io.connect(server_url)
+		socket = io.connect(server_url, {secure: true})
 
 		socket.on('signal', this.gotMessageFromServer)
 
