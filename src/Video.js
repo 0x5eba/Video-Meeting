@@ -459,6 +459,12 @@ class Video extends Component {
 						} else {
 
 							console.log("addStream silence")
+							
+							console.log("ok1")
+
+							alert(1)
+
+							console.log("ok2")
 
 							let silence = () => {
 								let ctx = new AudioContext()
