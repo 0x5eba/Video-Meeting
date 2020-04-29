@@ -65,11 +65,6 @@ class Video extends Component {
 		connections = {}
 
 		this.addMessage = this.addMessage.bind(this)
-		this.getMedia()
-	}
-
-	askForInteractions = () => {
-
 	}
 
 	getMedia = async () => {
@@ -97,7 +92,7 @@ class Video extends Component {
 			screen: this.screen
 		}, () => {
 			this.getUserMedia()
-			// this.connectToSocketServer()
+			this.connectToSocketServer()
 		})
 
 		if (navigator.mediaDevices.getDisplayMedia) {
@@ -617,7 +612,7 @@ class Video extends Component {
 		this.setState({
 			askForUsername: false,
 		}, () => {
-			this.connectToSocketServer()
+			this.getMedia()
 		})
 	}
 
