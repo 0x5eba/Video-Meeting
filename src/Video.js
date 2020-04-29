@@ -62,6 +62,8 @@ class Video extends Component {
 
 		this.addMessage = this.addMessage.bind(this)
 		this.getMedia()
+
+		console.log("PROOCODOFDJIENONO")
 	}
 
 	getMedia = async () => {
