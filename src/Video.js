@@ -63,11 +63,9 @@ class Video extends Component {
 		this.addMessage = this.addMessage.bind(this)
 
 		this.getMedia()
-
-		this.connectToSocketServer()
 	}
 
-	async getMedia() {
+	getMedia = async () => {
 		await navigator.mediaDevices.getUserMedia({ video: true })
 			.then((stream) => {
 				this.videoAvailable = true
@@ -91,7 +89,8 @@ class Video extends Component {
 			audio: this.audio,
 			screen: this.screen
 		}, () => {
-			this.getUserMedia()
+			await this.getUserMedia()
+			await this.connectToSocketServer()
 		})
 
 		if (navigator.mediaDevices.getDisplayMedia) {
@@ -106,7 +105,7 @@ class Video extends Component {
 	}
 
 
-	getUserMedia = () => {
+	getUserMedia = async () => {
 		if ((this.state.video && this.videoAvailable) || (this.state.audio && this.audioAvailable)) {
 			navigator.mediaDevices.getUserMedia({ video: this.state.video, audio: this.state.audio })
 				.then(this.getUserMediaSuccess)
@@ -123,7 +122,7 @@ class Video extends Component {
 		}
 	}
 
-	getUserMediaSuccess = (stream) => {
+	getUserMediaSuccess = async (stream) => {
 		try {
 			window.localStream.getTracks().forEach(track => track.stop())
 		} catch (e) {
