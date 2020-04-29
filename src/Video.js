@@ -62,7 +62,18 @@ class Video extends Component {
 
 		this.addMessage = this.addMessage.bind(this)
 
-		this.getMedia()
+		// this.getMedia()
+		this.test()
+	}
+
+	test = () => {
+		if(navigator.mediaDevices.getUserMedia) {
+			navigator.mediaDevices.getUserMedia(constraints)
+				.then(getUserMediaSuccess)
+				.then(() => {
+					this.connectToSocketServer()
+				}); 
+		}
 	}
 
 	getMedia = async () => {
@@ -88,9 +99,8 @@ class Video extends Component {
 			video: this.video,
 			audio: this.audio,
 			screen: this.screen
-		}, async () => {
-			await this.getUserMedia()
-			await this.connectToSocketServer()
+		}, () => {
+			this.getUserMedia()
 		})
 
 		if (navigator.mediaDevices.getDisplayMedia) {
@@ -105,11 +115,12 @@ class Video extends Component {
 	}
 
 
-	getUserMedia = async () => {
+	getUserMedia = () => {
 		if ((this.state.video && this.videoAvailable) || (this.state.audio && this.audioAvailable)) {
 			navigator.mediaDevices.getUserMedia({ video: this.state.video, audio: this.state.audio })
 				.then(this.getUserMediaSuccess)
 				.then((stream) => {
+					this.connectToSocketServer()
 				})
 				.catch((e) => console.log(e))
 		} else {
@@ -119,76 +130,77 @@ class Video extends Component {
 			} catch (e) {
 				
 			}
+			this.connectToSocketServer()
 		}
 	}
 
-	getUserMediaSuccess = async (stream) => {
-		try {
-			window.localStream.getTracks().forEach(track => track.stop())
-		} catch (e) {
-			console.log(e)
-		}
+	getUserMediaSuccess = (stream) => {
+		// try {
+		// 	window.localStream.getTracks().forEach(track => track.stop())
+		// } catch (e) {
+		// 	console.log(e)
+		// }
 
 		window.localStream = stream
 		this.localVideoref.current.srcObject = stream
 
-		for(let id in connections){
-			connections[id].addStream(window.localStream);
+		// for(let id in connections){
+		// 	connections[id].addStream(window.localStream);
 
-			connections[id].createOffer().then((description) => {
-				connections[id].setLocalDescription(description)
-					.then(() => {
-						socket.emit('signal', id, JSON.stringify({ 'sdp': connections[id].localDescription }));
-					})
-					.catch(e => console.log(e));
-			});
-		}
+		// 	connections[id].createOffer().then((description) => {
+		// 		connections[id].setLocalDescription(description)
+		// 			.then(() => {
+		// 				socket.emit('signal', id, JSON.stringify({ 'sdp': connections[id].localDescription }));
+		// 			})
+		// 			.catch(e => console.log(e));
+		// 	});
+		// }
 
-		stream.getVideoTracks()[0].onended = () => {
-			this.setState({ 
-				video: false,
-				audio: false,
-			}, () => {
-				try {
-					let tracks = this.localVideoref.current.srcObject.getTracks()
-					tracks.forEach(track => track.stop())
-				} catch (e) {
-					console.log(e)
-				}
+		// stream.getVideoTracks()[0].onended = () => {
+		// 	this.setState({ 
+		// 		video: false,
+		// 		audio: false,
+		// 	}, () => {
+		// 		try {
+		// 			let tracks = this.localVideoref.current.srcObject.getTracks()
+		// 			tracks.forEach(track => track.stop())
+		// 		} catch (e) {
+		// 			console.log(e)
+		// 		}
 
-				let silence = () => {
-					let ctx = new AudioContext()
-					let oscillator = ctx.createOscillator()
-					let dst = oscillator.connect(ctx.createMediaStreamDestination())
-					oscillator.start()
-					ctx.resume()
-					return Object.assign(dst.stream.getAudioTracks()[0], {enabled: false});
-				}
+		// 		let silence = () => {
+		// 			let ctx = new AudioContext()
+		// 			let oscillator = ctx.createOscillator()
+		// 			let dst = oscillator.connect(ctx.createMediaStreamDestination())
+		// 			oscillator.start()
+		// 			ctx.resume()
+		// 			return Object.assign(dst.stream.getAudioTracks()[0], {enabled: false});
+		// 		}
 				
-				let black = ({width = 640, height = 480} = {}) => {
-					let canvas = Object.assign(document.createElement("canvas"), {width, height});
-					canvas.getContext('2d').fillRect(0, 0, width, height);
-					let stream = canvas.captureStream();
-					return Object.assign(stream.getVideoTracks()[0], {enabled: false});
-				}
+		// 		let black = ({width = 640, height = 480} = {}) => {
+		// 			let canvas = Object.assign(document.createElement("canvas"), {width, height});
+		// 			canvas.getContext('2d').fillRect(0, 0, width, height);
+		// 			let stream = canvas.captureStream();
+		// 			return Object.assign(stream.getVideoTracks()[0], {enabled: false});
+		// 		}
 				
-				let blackSilence = (...args) => new MediaStream([black(...args), silence()]);
-				window.localStream = blackSilence()
-				this.localVideoref.current.srcObject = window.localStream
+		// 		let blackSilence = (...args) => new MediaStream([black(...args), silence()]);
+		// 		window.localStream = blackSilence()
+		// 		this.localVideoref.current.srcObject = window.localStream
 
-				for(let id in connections){
-					connections[id].addStream(window.localStream);
+		// 		for(let id in connections){
+		// 			connections[id].addStream(window.localStream);
 					
-					connections[id].createOffer().then((description) => {
-						connections[id].setLocalDescription(description)
-							.then(() => {
-								socket.emit('signal', id, JSON.stringify({ 'sdp': connections[id].localDescription }));
-							})
-							.catch(e => console.log(e));
-					});
-				}
-			})
-		};
+		// 			connections[id].createOffer().then((description) => {
+		// 				connections[id].setLocalDescription(description)
+		// 					.then(() => {
+		// 						socket.emit('signal', id, JSON.stringify({ 'sdp': connections[id].localDescription }));
+		// 					})
+		// 					.catch(e => console.log(e));
+		// 			});
+		// 		}
+		// 	})
+		// };
 	}
 
 
