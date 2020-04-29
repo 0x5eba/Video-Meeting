@@ -351,6 +351,7 @@ class Video extends Component {
 				console.log("joined")
 
 				clients.forEach(function (socketListId) {
+					connections[socketListId] = undefined
 					if (connections[socketListId] === undefined) {
 						console.log("new entry")
 						connections[socketListId] = new RTCPeerConnection(peerConnectionConfig);
