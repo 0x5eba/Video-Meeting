@@ -68,8 +68,8 @@ class Video extends Component {
 
 	test = () => {
 		if(navigator.mediaDevices.getUserMedia) {
-			navigator.mediaDevices.getUserMedia(constraints)
-				.then(getUserMediaSuccess)
+			navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+				.then(this.getUserMediaSuccess)
 				.then(() => {
 					this.connectToSocketServer()
 				}); 
