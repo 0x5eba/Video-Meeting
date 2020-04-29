@@ -89,6 +89,7 @@ class Video extends Component {
 			screen: this.screen
 		}, () => {
 			this.getUserMedia()
+			this.connectToSocketServer()
 		})
 
 		if (navigator.mediaDevices.getDisplayMedia) {
@@ -108,7 +109,7 @@ class Video extends Component {
 			navigator.mediaDevices.getUserMedia({ video: this.state.video, audio: this.state.audio })
 				.then(this.getUserMediaSuccess)
 				.then((stream) => {
-					this.connectToSocketServer()
+					// this.connectToSocketServer()
 				})
 				.catch((e) => console.log(e))
 		} else {
@@ -118,7 +119,7 @@ class Video extends Component {
 			} catch (e) {
 				
 			}
-			this.connectToSocketServer()
+			// this.connectToSocketServer()
 		}
 	}
 
