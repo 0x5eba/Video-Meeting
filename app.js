@@ -80,23 +80,19 @@ io.on('connection', function(socket){
 
 	socket.on('disconnect', function() {
 		var key;
-		var ok = false
-		for (const [k, v] of Object.entries(connections)) {
+		for (const [k, v] of JSON.parse(JSON.stringify(Object.entries(connections)))) {
 			for(let a = 0; a < v.length; ++a){
 				if(v[a] === socket.id){
 					key = k
-					ok = true
+
+					for(let a = 0; a < connections[key].length; ++a){
+						io.to(connections[key][a]).emit("user-left", socket.id);
+					}
+			
+					var index = connections[key].indexOf(socket.id);
+					connections[key].splice(index, 1);
 				}
 			}
-		}
-
-		if(ok === true){
-			for(let a = 0; a < connections[key].length; ++a){
-				io.to(connections[key][a]).emit("user-left", socket.id);
-			}
-	
-			var index = connections[key].indexOf(socket.id);
-			connections[key].splice(index, 1);
 		}
 	})
 });

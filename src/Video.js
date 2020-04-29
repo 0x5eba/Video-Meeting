@@ -62,8 +62,6 @@ class Video extends Component {
 
 		this.addMessage = this.addMessage.bind(this)
 		this.getMedia()
-
-		console.log("PROOCODOFDJIENONO")
 	}
 
 	getMedia = async () => {
@@ -125,30 +123,30 @@ class Video extends Component {
 	}
 
 	getUserMediaSuccess = (stream) => {
-		// try {
-		// 	window.localStream.getTracks().forEach(track => track.stop())
-		// } catch (e) {
-		// 	console.log(e)
-		// }
+		try {
+			window.localStream.getTracks().forEach(track => track.stop())
+		} catch (e) {
+			console.log(e)
+		}
 
 		window.localStream = stream
 		this.localVideoref.current.srcObject = stream
 
-		// for(let id in connections){
-		// 	if(id === socketId){
-		// 		continue
-		// 	}
+		for(let id in connections){
+			if(id === socketId){
+				continue
+			}
 
-		// 	connections[id].addStream(window.localStream);
+			connections[id].addStream(window.localStream);
 
-		// 	connections[id].createOffer().then((description) => {
-		// 		connections[id].setLocalDescription(description)
-		// 			.then(() => {
-		// 				socket.emit('signal', id, JSON.stringify({ 'sdp': connections[id].localDescription }));
-		// 			})
-		// 			.catch(e => console.log(e));
-		// 	});
-		// }
+			connections[id].createOffer().then((description) => {
+				connections[id].setLocalDescription(description)
+					.then(() => {
+						socket.emit('signal', id, JSON.stringify({ 'sdp': connections[id].localDescription }));
+					})
+					.catch(e => console.log(e));
+			});
+		}
 
 		// stream.getVideoTracks()[0].onended = () => {
 		// 	this.setState({ 
@@ -211,30 +209,30 @@ class Video extends Component {
 	}
 
 	getDislayMediaSuccess = (stream) => {
-		// try {
-		// 	window.localStream.getTracks().forEach(track => track.stop())
-		// } catch (e) {
-		// 	console.log(e)
-		// }
+		try {
+			window.localStream.getTracks().forEach(track => track.stop())
+		} catch (e) {
+			console.log(e)
+		}
 
 		window.localStream = stream
 		this.localVideoref.current.srcObject = stream
 
-		// for(let id in connections){
-		// 	if(id === socketId){
-		// 		continue
-		// 	}
+		for(let id in connections){
+			if(id === socketId){
+				continue
+			}
 
-		// 	connections[id].addStream(window.localStream);
+			connections[id].addStream(window.localStream);
 
-		// 	connections[id].createOffer().then((description) => {
-		// 		connections[id].setLocalDescription(description)
-		// 			.then(() => {
-		// 				socket.emit('signal', id, JSON.stringify({ 'sdp': connections[id].localDescription }));
-		// 			})
-		// 			.catch(e => console.log(e));
-		// 	});
-		// }
+			connections[id].createOffer().then((description) => {
+				connections[id].setLocalDescription(description)
+					.then(() => {
+						socket.emit('signal', id, JSON.stringify({ 'sdp': connections[id].localDescription }));
+					})
+					.catch(e => console.log(e));
+			});
+		}
 		
 
 		// stream.getVideoTracks()[0].onended = () => {
