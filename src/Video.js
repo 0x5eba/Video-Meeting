@@ -65,9 +65,11 @@ class Video extends Component {
 		connections = {}
 
 		this.addMessage = this.addMessage.bind(this)
+
+		this.getPermissions()
 	}
 
-	getMedia = async () => {
+	getPermissions = async () => {
 		await navigator.mediaDevices.getUserMedia({ video: true })
 			.then((stream) => {
 				this.videoAvailable = true
@@ -86,15 +88,6 @@ class Video extends Component {
 				this.audioAvailable = false
 			})
 
-		this.setState({
-			video: this.video,
-			audio: this.audio,
-			screen: this.screen
-		}, () => {
-			this.getUserMedia()
-			this.connectToSocketServer()
-		})
-
 		if (navigator.mediaDevices.getDisplayMedia) {
 			this.setState({
 				screenAvailable: true,
@@ -104,6 +97,29 @@ class Video extends Component {
 				screenAvailable: false,
 			}, () => {})
 		}
+
+		if (this.videoAvailable || this.audioAvailable) {
+			navigator.mediaDevices.getUserMedia({ video: this.videoAvailable, audio: this.audioAvailable })
+				.then((stream) => {
+					window.localStream = stream
+					this.localVideoref.current.srcObject = stream
+				})
+				.then((stream) => {
+					
+				})
+				.catch((e) => console.log(e))
+		}
+	}
+
+	getMedia = () => {
+		this.setState({
+			video: this.video,
+			audio: this.audio,
+			screen: this.screen
+		}, () => {
+			this.getUserMedia()
+			this.connectToSocketServer()
+		})
 	}
 
 
@@ -622,10 +638,19 @@ class Video extends Component {
 				{this.state.askForUsername === true ? 
 				<div>
 					<div style={{background: "white", width: "30%", height: "auto", padding: "20px", minWidth: "400px",
-						textAlign: "center", margin: "auto", marginTop: "100px"}}>
+						textAlign: "center", margin: "auto", marginTop: "100px", justifyContent: "center"}}>
 						<p style={{margin: 0, fontWeight: "bold", paddingRight: "50px"}}>Set your username</p>
 						<Input placeholder="Username" value={this.state.username} onChange={e => this.handleUsername(e)} />
 						<Button variant="contained" color="primary" onClick={this.connect} style={{ margin: "20px" }}>Connect</Button>
+					</div>
+
+					<div style={{justifyContent: "center", textAlign: "center", paddingTop: "40px"}}>
+						<video id="my-video" ref={this.localVideoref} autoPlay muted style={{
+							borderStyle: "solid",
+							borderColor: "#bdbdbd",
+							objectFit: "fill",
+							width: "80%", 
+							height: "50%"}}></video>
 					</div>
 				</div>
 				:
