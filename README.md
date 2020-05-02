@@ -4,7 +4,7 @@ Google Meet / Zoom clone in a few lines of code.
 
 Video Meeting is a video conference website that lets you stay in touch with all your friends.
 
-Developed with MERN (MongoDB, Express, ReactJS, Node.js) stack.
+Developed with ReactJS, Node.js, SocketIO.
 
 ### Website
 Try Video Meeting here [video.sebastienbiollo.com](https://video.sebastienbiollo.com)
