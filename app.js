@@ -22,8 +22,8 @@ app.set('port', (process.env.PORT || 4001))
 
 
 connections = {}
-
 messages = {}
+timeOnline = {}
 
 io.on('connection', function(socket){
 
@@ -32,6 +32,8 @@ io.on('connection', function(socket){
 			connections[path] = []
 		}
 		connections[path].push(socket.id);
+
+		timeOnline[socket.id] = new Date();
 
 		for(let a = 0; a < connections[path].length; ++a){
 			io.to(connections[path][a]).emit("user-joined", socket.id, connections[path]);
@@ -43,7 +45,7 @@ io.on('connection', function(socket){
 			}
 		}
 
-		console.log(connections)
+		console.log(path, connections[path])
 	});
 
 	socket.on('signal', (toId, message) => {
@@ -71,6 +73,7 @@ io.on('connection', function(socket){
 				messages[key] = []
 			}
 			messages[key].push({"sender": socket.id, "data": data})
+			console.log("message", key, data)
 
 			for(let a = 0; a < connections[key].length; ++a){
 				io.to(connections[key][a]).emit("chat-message", data, socket.id);
@@ -79,6 +82,7 @@ io.on('connection', function(socket){
 	})
 
 	socket.on('disconnect', function() {
+		var diffTime = Math.abs(timeOnline[socket.id] - new Date());
 		var key;
 		for (const [k, v] of JSON.parse(JSON.stringify(Object.entries(connections)))) {
 			for(let a = 0; a < v.length; ++a){
@@ -91,6 +95,12 @@ io.on('connection', function(socket){
 			
 					var index = connections[key].indexOf(socket.id);
 					connections[key].splice(index, 1);
+
+					console.log(key, socket.id, Math.ceil(diffTime / 1000));
+
+					if(connections[key].length === 0){
+						delete connections[key]
+					}
 				}
 			}
 		}

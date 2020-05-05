@@ -10,13 +10,13 @@ class Home extends Component {
 		}
 	}
 
-	handleChange(e) {
+	handleChange = (e) => {
 		this.setState({
 			url: e.target.value
 		})
 	}
 
-	join() {
+	join = () => {
 		if (this.state.url !== "") {
 			if (this.state.url.includes(window.location.href) || this.state.url.includes(window.location.href.substring(8, window.location.href.length))) {
 				window.location.href = this.state.url

@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
-import io from 'socket.io-client'
+import io from 'socket.io-client';
+import faker from "faker";
+
 import IconButton from '@material-ui/core/IconButton';
 import Badge from '@material-ui/core/Badge';
 import { Input, Button } from '@material-ui/core';
-
 import VideocamIcon from '@material-ui/icons/Videocam';
 import VideocamOffIcon from '@material-ui/icons/VideocamOff';
 import MicIcon from '@material-ui/icons/Mic';
@@ -13,15 +14,13 @@ import StopScreenShareIcon from '@material-ui/icons/StopScreenShare';
 import CallEndIcon from '@material-ui/icons/CallEnd';
 import ChatIcon from '@material-ui/icons/Chat';
 
-import faker from "faker";
-
 import { message } from 'antd';
-import 'antd/dist/antd.css'
+import 'antd/dist/antd.css';
 
 import { Row } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal'
 import 'bootstrap/dist/css/bootstrap.css';
-import "./Video.css"
+import "./Video.css";
 
 const server_url = process.env.NODE_ENV === 'production' ? 'https://video.sebastienbiollo.com' : "http://localhost:4001"
 
@@ -91,11 +90,11 @@ class Video extends Component {
 		if (navigator.mediaDevices.getDisplayMedia) {
 			this.setState({
 				screenAvailable: true,
-			}, () => { })
+			})
 		} else {
 			this.setState({
 				screenAvailable: false,
-			}, () => { })
+			})
 		}
 
 		if (this.videoAvailable || this.audioAvailable) {
@@ -104,9 +103,7 @@ class Video extends Component {
 					window.localStream = stream
 					this.localVideoref.current.srcObject = stream
 				})
-				.then((stream) => {
-
-				})
+				.then((stream) => {})
 				.catch((e) => console.log(e))
 		}
 	}
@@ -127,18 +124,15 @@ class Video extends Component {
 		if ((this.state.video && this.videoAvailable) || (this.state.audio && this.audioAvailable)) {
 			navigator.mediaDevices.getUserMedia({ video: this.state.video, audio: this.state.audio })
 				.then(this.getUserMediaSuccess)
-				.then((stream) => {
-					// this.connectToSocketServer()
-				})
+				.then((stream) => {})
 				.catch((e) => console.log(e))
 		} else {
 			try {
 				let tracks = this.localVideoref.current.srcObject.getTracks()
 				tracks.forEach(track => track.stop())
 			} catch (e) {
-
+				
 			}
-			// this.connectToSocketServer()
 		}
 	}
 
@@ -153,9 +147,7 @@ class Video extends Component {
 		this.localVideoref.current.srcObject = stream
 
 		for (let id in connections) {
-			if (id === socketId) {
-				continue
-			}
+			if (id === socketId) continue
 
 			connections[id].addStream(window.localStream);
 
@@ -221,8 +213,7 @@ class Video extends Component {
 			if (navigator.mediaDevices.getDisplayMedia) {
 				navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
 					.then(this.getDislayMediaSuccess)
-					.then((stream) => {
-					})
+					.then((stream) => {})
 					.catch((e) => console.log(e))
 			}
 		}
@@ -239,9 +230,7 @@ class Video extends Component {
 		this.localVideoref.current.srcObject = stream
 
 		for (let id in connections) {
-			if (id === socketId) {
-				continue
-			}
+			if (id === socketId) continue
 
 			connections[id].addStream(window.localStream);
 
@@ -527,19 +516,19 @@ class Video extends Component {
 		this.setState({
 			showModal: true,
 			newmessages: 0,
-		}, () => { })
+		})
 	}
 
 	closeChat = () => {
 		this.setState({
 			showModal: false,
-		}, () => { })
+		})
 	}
 
 	handleMessage = (e) => {
 		this.setState({
 			message: e.target.value,
-		}, () => { })
+		})
 	}
 
 	addMessage = (data, sender) => {
@@ -559,7 +548,7 @@ class Video extends Component {
 		socket.emit('chat-message', this.state.message)
 		this.setState({
 			message: "",
-		}, () => { })
+		})
 	}
 
 	copyUrl = (e) => {
