@@ -590,7 +590,25 @@ class Video extends Component {
 		})
 	}
 
+	isChromeOrFirefox = function() {
+		var userAgent = (navigator && navigator.userAgent || '').toLowerCase()
+		var vendor = (navigator && navigator.vendor || '').toLowerCase()
+		var matchChrome = /google inc/.test(vendor) ? userAgent.match(/(?:chrome|crios)\/(\d+)/) : null
+		var matchFirefox = userAgent.match(/(?:firefox|fxios)\/(\d+)/)
+		return matchChrome !== null || matchFirefox !== null
+	}
+
 	render() {
+		if(this.isChromeOrFirefox() === false){
+			return (
+				<div style={{
+					background: "white", width: "30%", height: "auto", padding: "20px", minWidth: "400px",
+					textAlign: "center", margin: "auto", marginTop: "50px", justifyContent: "center"
+				}}>
+					<h1>Use Chrome or Firefox</h1>
+				</div>
+			)
+		}
 		return (
 			<div>
 				{this.state.askForUsername === true ?
