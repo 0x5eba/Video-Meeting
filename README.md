@@ -1,5 +1,7 @@
 # Video Meeting
 
+[![Run on Repl.it](https://repl.it/badge/github/0x5eba/Video-Meeting)](https://repl.it/github/0x5eba/Video-Meeting)
+
 Google Meet / Zoom clone in a few lines of code.
 
 Video Meeting is a video conference website that lets you stay in touch with all your friends.
