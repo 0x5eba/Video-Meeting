@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { Input, Button } from '@material-ui/core';
+import { Input, Button, IconButton } from '@material-ui/core';
+import GitHubIcon from '@material-ui/icons/GitHub';
 import "./Home.css"
 
 class Home extends Component {
@@ -31,6 +32,13 @@ class Home extends Component {
 	render() {
 		return (
 			<div className="container2">
+				<div style={{fontSize: "14px", background: "white", width: "10%", textAlign: "center", margin: "auto", marginBottom: "10px"}}>
+					Source code: 
+					<IconButton style={{color: "black"}} onClick={() => window.location.href="https://github.com/0x5eba/Video-Meeting"}>
+						<GitHubIcon />
+					</IconButton>
+				</div>
+				
 				<div>
 					<h1 style={{ fontSize: "45px" }}>Video Meeting</h1>
 					<p style={{ fontWeight: "200" }}>Video conference website that lets you stay in touch with all your friends.</p>

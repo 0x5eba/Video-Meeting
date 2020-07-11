@@ -1,7 +1,5 @@
 # Video Meeting
 
-[![Run on Repl.it](https://repl.it/badge/github/0x5eba/Video-Meeting)](https://repl.it/github/0x5eba/Video-Meeting)
-
 Google Meet / Zoom clone in a few lines of code.
 
 Video Meeting is a video conference website that lets you stay in touch with all your friends.
@@ -25,11 +23,5 @@ Try Video Meeting here [video.sebastienbiollo.com](https://video.sebastienbiollo
 
 ### Local setup
 
-Development:
 1. `yarn install`
 2. `yarn dev`
-
-Production:
-1. `yarn install`
-2. `yarn build`
-3. `yarn server`
