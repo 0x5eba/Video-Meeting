@@ -11,11 +11,7 @@ class Home extends Component {
 		}
 	}
 
-	handleChange = (e) => {
-		this.setState({
-			url: e.target.value
-		})
-	}
+	handleChange = (e) => this.setState({ url: e.target.value })
 
 	join = () => {
 		if (this.state.url !== "") {
