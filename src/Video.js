@@ -340,14 +340,21 @@ class Video extends Component {
 				})
 
 				if (id === socketId) {
-					// Create an offer only of your self
-					connections[id].createOffer().then((description) => {
-						connections[id].setLocalDescription(description)
-							.then(() => {
-								socket.emit('signal', id, JSON.stringify({ 'sdp': connections[id].localDescription }))
-							})
-							.catch(e => console.log(e))
-					})
+					for (let id2 in connections) {
+						if (id2 === socketId) continue
+						
+						try {
+							connections[id2].addStream(window.localStream)
+						} catch(e) {}
+			
+						connections[id2].createOffer().then((description) => {
+							connections[id2].setLocalDescription(description)
+								.then(() => {
+									socket.emit('signal', id2, JSON.stringify({ 'sdp': connections[id2].localDescription }))
+								})
+								.catch(e => console.log(e))
+						})
+					}
 				}
 			})
 		})
