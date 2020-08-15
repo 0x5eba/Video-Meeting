@@ -4,6 +4,7 @@ var cors = require('cors')
 const app = express()
 const bodyParser = require('body-parser')
 const path = require("path")
+var xss = require("xss")
 
 var server = http.createServer(app)
 var io = require('socket.io')(server)
@@ -19,6 +20,9 @@ if(process.env.NODE_ENV==='production'){
 }
 app.set('port', (process.env.PORT || 4001))
 
+sanitizeString = (str) => {
+	return xss(str)
+}
 
 connections = {}
 messages = {}
@@ -53,6 +57,9 @@ io.on('connection', (socket) => {
 	})
 
 	socket.on('chat-message', (data, sender) => {
+		data = sanitizeString(data)
+		sender = sanitizeString(sender)
+
 		var key
 		var ok = false
 		for (const [k, v] of Object.entries(connections)) {
