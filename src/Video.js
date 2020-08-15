@@ -133,7 +133,7 @@ class Video extends Component {
 			})
 		}
 
-		stream.getVideoTracks()[0].onended = () => {
+		stream.getTracks().forEach(track => track.onended = () => {
 			this.setState({
 				video: false,
 				audio: false,
@@ -159,7 +159,7 @@ class Video extends Component {
 					})
 				}
 			})
-		}
+		})
 	}
 
 	getDislayMedia = () => {
@@ -195,7 +195,7 @@ class Video extends Component {
 			})
 		}
 
-		stream.getVideoTracks()[0].onended = () => {
+		stream.getTracks().forEach(track => track.onended = () => {
 			this.setState({
 				screen: false,
 			}, () => {
@@ -210,7 +210,7 @@ class Video extends Component {
 
 				this.getUserMedia()
 			})
-		}
+		})
 	}
 
 	gotMessageFromServer = (fromId, message) => {
@@ -245,7 +245,10 @@ class Video extends Component {
 
 		let height = String(100 / elms) + "%"
 		let width = ""
-		if (elms === 1 || elms === 2) {
+		if(elms === 0 || elms === 1) {
+			width = "100%"
+			height = "100%"
+		} else if (elms === 2) {
 			width = "45%"
 			height = "100%"
 		} else if (elms === 3 || elms === 4) {
@@ -290,57 +293,54 @@ class Video extends Component {
 
 			socket.on('user-joined', (id, clients) => {
 				clients.forEach((socketListId) => {
-					connections[socketListId] = undefined
-					if (connections[socketListId] === undefined) {
-						connections[socketListId] = new RTCPeerConnection(peerConnectionConfig)
-						// Wait for their ice candidate       
-						connections[socketListId].onicecandidate = function (event) {
-							if (event.candidate != null) {
-								socket.emit('signal', socketListId, JSON.stringify({ 'ice': event.candidate }))
-							}
+					connections[socketListId] = new RTCPeerConnection(peerConnectionConfig)
+					// Wait for their ice candidate       
+					connections[socketListId].onicecandidate = function (event) {
+						if (event.candidate != null) {
+							socket.emit('signal', socketListId, JSON.stringify({ 'ice': event.candidate }))
 						}
+					}
 
-						// Wait for their video stream
-						connections[socketListId].onaddstream = (event) => {
-							// TODO mute button, full screen button
-							var searchVidep = document.querySelector(`[data-socket="${socketListId}"]`)
-							if (searchVidep !== null) { // if i don't do this check it make an empyt square
-								searchVidep.srcObject = event.stream
-							} else {
-								elms = clients.length
-								let main = document.getElementById('main')
-								let cssMesure = this.changeCssVideos(main)
-
-								let video = document.createElement('video')
-
-								let css = {minWidth: cssMesure.minWidth, minHeight: cssMesure.minHeight, maxHeight: "100%", margin: "10px",
-									borderStyle: "solid", borderColor: "#bdbdbd", objectFit: "fill"}
-								for(let i in css) video.style[i] = css[i]
-
-								video.style.setProperty("width", cssMesure.width)
-								video.style.setProperty("height", cssMesure.height)
-								video.setAttribute('data-socket', socketListId)
-								video.srcObject = event.stream
-								video.autoplay = true
-								video.playsinline = true
-
-								main.appendChild(video)
-							}
-						}
-
-						// Add the local video stream
-						if (window.localStream !== undefined && window.localStream !== null) {
-							connections[socketListId].addStream(window.localStream)
+					// Wait for their video stream
+					connections[socketListId].onaddstream = (event) => {
+						// TODO mute button, full screen button
+						var searchVidep = document.querySelector(`[data-socket="${socketListId}"]`)
+						if (searchVidep !== null) { // if i don't do this check it make an empyt square
+							searchVidep.srcObject = event.stream
 						} else {
-							let blackSilence = (...args) => new MediaStream([this.black(...args), this.silence()])
-							window.localStream = blackSilence()
-							connections[socketListId].addStream(window.localStream)
+							elms = clients.length
+							let main = document.getElementById('main')
+							let cssMesure = this.changeCssVideos(main)
+
+							let video = document.createElement('video')
+
+							let css = {minWidth: cssMesure.minWidth, minHeight: cssMesure.minHeight, maxHeight: "100%", margin: "10px",
+								borderStyle: "solid", borderColor: "#bdbdbd", objectFit: "fill"}
+							for(let i in css) video.style[i] = css[i]
+
+							video.style.setProperty("width", cssMesure.width)
+							video.style.setProperty("height", cssMesure.height)
+							video.setAttribute('data-socket', socketListId)
+							video.srcObject = event.stream
+							video.autoplay = true
+							video.playsinline = true
+
+							main.appendChild(video)
 						}
+					}
+
+					// Add the local video stream
+					if (window.localStream !== undefined && window.localStream !== null) {
+						connections[socketListId].addStream(window.localStream)
+					} else {
+						let blackSilence = (...args) => new MediaStream([this.black(...args), this.silence()])
+						window.localStream = blackSilence()
+						connections[socketListId].addStream(window.localStream)
 					}
 				})
 
-				if (id !== socketId) {
-					// Create an offer to connect with your local description
+				if (id === socketId) {
+					// Create an offer only of your self
 					connections[id].createOffer().then((description) => {
 						connections[id].setLocalDescription(description)
 							.then(() => {
