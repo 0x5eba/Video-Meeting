@@ -433,20 +433,21 @@ class Video extends Component {
 
 	connect = () => this.setState({ askForUsername: false }, () => this.getMedia())
 
-	isChromeOrFirefox = function() {
-		let userAgent = (navigator && navigator.userAgent || '').toLowerCase()
-		let vendor = (navigator && navigator.vendor || '').toLowerCase()
+	isChrome = function () {
+		let userAgent = (navigator && (navigator.userAgent || '')).toLowerCase()
+		let vendor = (navigator && (navigator.vendor || '')).toLowerCase()
 		let matchChrome = /google inc/.test(vendor) ? userAgent.match(/(?:chrome|crios)\/(\d+)/) : null
-		let matchFirefox = userAgent.match(/(?:firefox|fxios)\/(\d+)/)
-		return matchChrome !== null || matchFirefox !== null
+		// let matchFirefox = userAgent.match(/(?:firefox|fxios)\/(\d+)/)
+		// return matchChrome !== null || matchFirefox !== null
+		return matchChrome !== null
 	}
 
 	render() {
-		if(this.isChromeOrFirefox() === false){
+		if(this.isChrome() === false){
 			return (
 				<div style={{background: "white", width: "30%", height: "auto", padding: "20px", minWidth: "400px",
 						textAlign: "center", margin: "auto", marginTop: "50px", justifyContent: "center"}}>
-					<h1>Use Chrome or Firefox</h1>
+					<h1>Sorry, this works only with Google Chrome</h1>
 				</div>
 			)
 		}
