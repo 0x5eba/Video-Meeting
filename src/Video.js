@@ -165,12 +165,27 @@ class Video extends Component {
 	getDislayMedia = () => {
 		if (this.state.screen) {
 			if (navigator.mediaDevices.getDisplayMedia) {
-				navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
-					.then(this.getDislayMediaSuccess)
-					.then((stream) => {})
-					.catch((e) => console.log(e))
+			  navigator.mediaDevices
+			    .getDisplayMedia({ video: true, audio: true })
+			    .then(this.getDislayMediaSuccess)
+			    .then((stream) => {})
+			    .catch((e) => console.log(e));
 			}
-		}
+		   }
+		   else{
+			try {
+			  let tracks = this.localVideoref.current.srcObject.getTracks();
+			  tracks.forEach((track) => track.stop());
+			} catch (e) {
+			  console.log(e);
+			}
+	    
+			let blackSilence = (...args) =>
+			  new MediaStream([this.black(...args), this.silence()]);
+			  window.localStream = blackSilence();
+			  this.localVideoref.current.srcObject = window.localStream;
+			  this.getUserMedia();
+			}
 	}
 
 	getDislayMediaSuccess = (stream) => {
