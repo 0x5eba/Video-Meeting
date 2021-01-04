@@ -1,12 +1,19 @@
 const express = require('express')
-const http = require('http')
+const https = require('https')
+const fs=require('fs')
 var cors = require('cors')
 const app = express()
 const bodyParser = require('body-parser')
 const path = require("path")
 var xss = require("xss")
 
-var server = http.createServer(app)
+//ssl
+var key = fs.readFileSync('./ssl/key.pem').toString();
+var cert = fs.readFileSync('./ssl/cert.pem').toString();
+var options={
+	key,cert
+}
+var server = https.createServer(options,app)
 var io = require('socket.io')(server)
 
 app.use(cors())
