@@ -315,7 +315,7 @@ class Video extends Component {
 							let video = document.createElement('video')
 
 							let css = {minWidth: cssMesure.minWidth, minHeight: cssMesure.minHeight, maxHeight: "100%", margin: "10px",
-								borderStyle: "solid", borderColor: "#bdbdbd", objectFit: "fill"}
+								borderStyle: "solid", borderColor: "#bdbdbd", objectFit: "fill", transform: "rotateY(180deg)"}
 							for(let i in css) video.style[i] = css[i]
 
 							video.style.setProperty("width", cssMesure.width)
@@ -464,7 +464,8 @@ class Video extends Component {
 
 						<div style={{ justifyContent: "center", textAlign: "center", paddingTop: "40px" }}>
 							<video id="my-video" ref={this.localVideoref} autoPlay muted style={{
-								borderStyle: "solid",borderColor: "#bdbdbd",objectFit: "fill",width: "60%",height: "30%"}}></video>
+								transform: "rotateY(180deg)",borderStyle: "solid",
+								borderColor: "#bdbdbd",objectFit: "fill",width: "60%",height: "30%"}}></video>
 						</div>
 					</div>
 					:
@@ -523,7 +524,7 @@ class Video extends Component {
 							<Row id="main" className="flex-container" style={{ margin: 0, padding: 0 }}>
 								<video id="my-video" ref={this.localVideoref} autoPlay muted style={{
 									borderStyle: "solid",borderColor: "#bdbdbd",margin: "10px",objectFit: "fill",
-									width: "100%",height: "100%"}}></video>
+									transform: "rotateY(180deg)",width: "100%",height: "100%"}}></video>
 							</Row>
 						</div>
 					</div>
