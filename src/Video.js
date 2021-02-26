@@ -315,7 +315,7 @@ class Video extends Component {
 							let video = document.createElement('video')
 
 							let css = {minWidth: cssMesure.minWidth, minHeight: cssMesure.minHeight, maxHeight: "100%", margin: "10px",
-								borderStyle: "solid", borderColor: "#bdbdbd", objectFit: "fill", transform: "rotateY(180deg)"}
+								borderStyle: "solid", borderColor: "#bdbdbd", objectFit: "fill"}
 							for(let i in css) video.style[i] = css[i]
 
 							video.style.setProperty("width", cssMesure.width)
