@@ -1,17 +1,23 @@
 const express = require('express')
-const http = require('http')
+const https = require('https')
+const fs=require('fs')
 var cors = require('cors')
 const app = express()
 const bodyParser = require('body-parser')
 const path = require("path")
 var xss = require("xss")
 
-var server = http.createServer(app)
+//ssl
+var key = fs.readFileSync('./ssl/key.pem').toString();
+var cert = fs.readFileSync('./ssl/cert.pem').toString();
+var options={
+	key,cert
+}
+var server = https.createServer(options,app)
 var io = require('socket.io')(server)
 
 app.use(cors())
 app.use(bodyParser.json())
-
 if(process.env.NODE_ENV==='production'){
 	app.use(express.static(__dirname+"/build"))
 	app.get("*", (req, res) => {
@@ -111,5 +117,5 @@ io.on('connection', (socket) => {
 })
 
 server.listen(app.get('port'), () => {
-	console.log("listening on", app.get('port'))
+	console.log("server listening on", app.get('port'))
 })

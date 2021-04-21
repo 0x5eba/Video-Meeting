@@ -1,5 +1,8 @@
 # Video Meeting
-
+### Change (see [issue](https://github.com/wk989898/Video-Meeting/issues/2))
+- use https 
+- add scripts on windows   
+ 
 Google Meet / Zoom clone in a few lines of code.
 
 Video Meeting is a video conference website that lets you stay in touch with all your friends.
