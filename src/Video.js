@@ -168,7 +168,10 @@ class Video extends Component {
 				navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
 					.then(this.getDislayMediaSuccess)
 					.then((stream) => {})
-					.catch((e) => console.log(e))
+					.catch((e) => {
+						console.log(e);
+						this.setState({ screen: false });
+					})
 			}
 		}
 	}
