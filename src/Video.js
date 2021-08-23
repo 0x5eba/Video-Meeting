@@ -353,9 +353,7 @@ class Video extends Component {
 									socket.emit('signal', id2, JSON.stringify({ 'sdp': connections[id2].localDescription }))
 								})
 								.catch(e => console.log(e))
-						})
-					}
-				}
+						})}}
 			})
 		})
 	}
