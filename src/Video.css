@@ -1,39 +1,39 @@
 body {
-    margin: 0;
+  margin: 0;
 }
 
 .flex-container {
-    height: calc(100% - 150px);
-    width: 100%;
-    /* margin: 0 auto; */
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
+  height: calc(100% - 150px);
+  width: 100%;
+  /* margin: 0 auto; */
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
 }
 
 .container {
-    height: 100vh;
-    width: 100vw;
-    max-width: 100vw;
-    max-height: 100vh;
+  height: 100vh;
+  width: 100vw;
+  max-width: 100vw;
+  max-height: 100vh;
 
-    align-items: center;
-    justify-content: center;
-    text-align: center;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 .div-send-msg {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 .btn-down {
-    z-index: 2;
-    position: fixed; 
-    bottom: 0px;
-    width: 100%;
-    height: auto;
+  z-index: 2;
+  position: fixed;
+  bottom: 0px;
+  width: 100%;
+  height: auto;
 }

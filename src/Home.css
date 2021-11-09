@@ -1,16 +1,17 @@
-html, body {
-  	height: 100%;
+html,
+body {
+  height: 100%;
 }
 body {
-	margin: 0;
-	text-align: center;
-	background-color: whitesmoke;
+  margin: 0;
+  text-align: center;
+  background-color: whitesmoke;
 }
 
 .container2 {
-	padding-top: 30px;
-	margin: auto;
-	align-items: center;
-	justify-content: center;
-	text-align: center;
+  padding-top: 30px;
+  margin: auto;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
