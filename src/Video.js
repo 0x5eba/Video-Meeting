@@ -20,7 +20,7 @@ import Modal from 'react-bootstrap/Modal'
 import 'bootstrap/dist/css/bootstrap.css'
 import "./Video.css"
 
-const server_url = process.env.NODE_ENV === 'production' ? 'https://video.sebastienbiollo.com' : "http://localhost:4001"
+const server_url = process.env.NODE_ENV === 'production' ? window.location.origin : "http://localhost:4001"
 
 var connections = {}
 const peerConnectionConfig = {
@@ -56,7 +56,7 @@ class Video extends Component {
 		}
 		connections = {}
 
-		this.getPermissions()
+		this.permissionsChecked = this.getPermissions()
 	}
 
 	getPermissions = async () => {
@@ -88,13 +88,14 @@ class Video extends Component {
 	}
 
 	getMedia = () => {
-		this.setState({
+		// Wait for the camera/mic probe, otherwise a quick "Connect" starts with both marked unavailable
+		this.permissionsChecked.then(() => this.setState({
 			video: this.videoAvailable,
 			audio: this.audioAvailable
 		}, () => {
 			this.getUserMedia()
 			this.connectToSocketServer()
-		})
+		}))
 	}
 
 	getUserMedia = () => {
@@ -104,61 +105,18 @@ class Video extends Component {
 				.then((stream) => {})
 				.catch((e) => console.log(e))
 		} else {
-			try {
-				let tracks = this.localVideoref.current.srcObject.getTracks()
-				tracks.forEach(track => track.stop())
-			} catch (e) {}
+			this.setLocalStream(null)
 		}
 	}
 
 	getUserMediaSuccess = (stream) => {
-		try {
-			window.localStream.getTracks().forEach(track => track.stop())
-		} catch(e) { console.log(e) }
-
-		window.localStream = stream
-		this.localVideoref.current.srcObject = stream
-
-		for (let id in connections) {
-			if (id === socketId) continue
-
-			connections[id].addStream(window.localStream)
-
-			connections[id].createOffer().then((description) => {
-				connections[id].setLocalDescription(description)
-					.then(() => {
-						socket.emit('signal', id, JSON.stringify({ 'sdp': connections[id].localDescription }))
-					})
-					.catch(e => console.log(e))
-			})
-		}
+		this.setLocalStream(stream)
 
 		stream.getTracks().forEach(track => track.onended = () => {
 			this.setState({
 				video: false,
 				audio: false,
-			}, () => {
-				try {
-					let tracks = this.localVideoref.current.srcObject.getTracks()
-					tracks.forEach(track => track.stop())
-				} catch(e) { console.log(e) }
-
-				let blackSilence = (...args) => new MediaStream([this.black(...args), this.silence()])
-				window.localStream = blackSilence()
-				this.localVideoref.current.srcObject = window.localStream
-
-				for (let id in connections) {
-					connections[id].addStream(window.localStream)
-
-					connections[id].createOffer().then((description) => {
-						connections[id].setLocalDescription(description)
-							.then(() => {
-								socket.emit('signal', id, JSON.stringify({ 'sdp': connections[id].localDescription }))
-							})
-							.catch(e => console.log(e))
-					})
-				}
-			})
+			}, () => this.setLocalStream(null))
 		})
 	}
 
@@ -170,53 +128,51 @@ class Video extends Component {
 					.then((stream) => {})
 					.catch((e) => console.log(e))
 			}
+		} else {
+			this.getUserMedia()
 		}
 	}
 
 	getDislayMediaSuccess = (stream) => {
-		try {
-			window.localStream.getTracks().forEach(track => track.stop())
-		} catch(e) { console.log(e) }
-
-		window.localStream = stream
-		this.localVideoref.current.srcObject = stream
-
-		for (let id in connections) {
-			if (id === socketId) continue
-
-			connections[id].addStream(window.localStream)
-
-			connections[id].createOffer().then((description) => {
-				connections[id].setLocalDescription(description)
-					.then(() => {
-						socket.emit('signal', id, JSON.stringify({ 'sdp': connections[id].localDescription }))
-					})
-					.catch(e => console.log(e))
-			})
-		}
+		this.setLocalStream(stream)
 
 		stream.getTracks().forEach(track => track.onended = () => {
 			this.setState({
 				screen: false,
-			}, () => {
-				try {
-					let tracks = this.localVideoref.current.srcObject.getTracks()
-					tracks.forEach(track => track.stop())
-				} catch(e) { console.log(e) }
-
-				let blackSilence = (...args) => new MediaStream([this.black(...args), this.silence()])
-				window.localStream = blackSilence()
-				this.localVideoref.current.srcObject = window.localStream
-
-				this.getUserMedia()
-			})
+			}, () => this.getUserMedia())
 		})
+	}
+
+	// Every peer connection always carries exactly one audio and one video sender,
+	// so missing tracks are filled with silence / black frames
+	fillMissingTracks = (stream) => {
+		let tracks = stream ? stream.getTracks() : []
+		if (!tracks.some(track => track.kind === 'audio')) tracks.push(this.silence())
+		if (!tracks.some(track => track.kind === 'video')) tracks.push(this.black())
+		return new MediaStream(tracks)
+	}
+
+	// Swap the outgoing tracks in place: no renegotiation, so no duplicate connections or offer glare
+	setLocalStream = (stream) => {
+		try {
+			window.localStream.getTracks().forEach(track => track.stop())
+		} catch(e) { console.log(e) }
+
+		window.localStream = this.fillMissingTracks(stream)
+		this.localVideoref.current.srcObject = window.localStream
+
+		for (let id in connections) {
+			connections[id].getSenders().forEach(sender => {
+				let track = window.localStream.getTracks().find(t => t.kind === sender.track.kind)
+				sender.replaceTrack(track).catch(e => console.log(e))
+			})
+		}
 	}
 
 	gotMessageFromServer = (fromId, message) => {
 		var signal = JSON.parse(message)
 
-		if (fromId !== socketId) {
+		if (fromId !== socketId && connections[fromId] !== undefined) {
 			if (signal.sdp) {
 				connections[fromId].setRemoteDescription(new RTCSessionDescription(signal.sdp)).then(() => {
 					if (signal.sdp.type === 'offer') {
@@ -281,6 +237,11 @@ class Video extends Component {
 			socket.on('chat-message', this.addMessage)
 
 			socket.on('user-left', (id) => {
+				if (connections[id] !== undefined) {
+					connections[id].close()
+					delete connections[id]
+				}
+
 				let video = document.querySelector(`[data-socket="${id}"]`)
 				if (video !== null) {
 					elms--
@@ -293,6 +254,9 @@ class Video extends Component {
 
 			socket.on('user-joined', (id, clients) => {
 				clients.forEach((socketListId) => {
+					// One connection per remote peer, created once; never one to ourselves
+					if (socketListId === socketId || connections[socketListId] !== undefined) return
+
 					connections[socketListId] = new RTCPeerConnection(peerConnectionConfig)
 					// Wait for their ice candidate       
 					connections[socketListId].onicecandidate = function (event) {
@@ -302,11 +266,12 @@ class Video extends Component {
 					}
 
 					// Wait for their video stream
-					connections[socketListId].onaddstream = (event) => {
+					connections[socketListId].ontrack = (event) => {
 						// TODO mute button, full screen button
+						let stream = event.streams[0]
 						var searchVidep = document.querySelector(`[data-socket="${socketListId}"]`)
 						if (searchVidep !== null) { // if i don't do this check it make an empyt square
-							searchVidep.srcObject = event.stream
+							if (searchVidep.srcObject !== stream) searchVidep.srcObject = stream
 						} else {
 							elms = clients.length
 							let main = document.getElementById('main')
@@ -321,7 +286,7 @@ class Video extends Component {
 							video.style.setProperty("width", cssMesure.width)
 							video.style.setProperty("height", cssMesure.height)
 							video.setAttribute('data-socket', socketListId)
-							video.srcObject = event.stream
+							video.srcObject = stream
 							video.autoplay = true
 							video.playsinline = true
 
@@ -329,24 +294,13 @@ class Video extends Component {
 						}
 					}
 
-					// Add the local video stream
-					if (window.localStream !== undefined && window.localStream !== null) {
-						connections[socketListId].addStream(window.localStream)
-					} else {
-						let blackSilence = (...args) => new MediaStream([this.black(...args), this.silence()])
-						window.localStream = blackSilence()
-						connections[socketListId].addStream(window.localStream)
-					}
+					// Add the local tracks (one audio + one video sender)
+					window.localStream = this.fillMissingTracks(window.localStream)
+					window.localStream.getTracks().forEach(track => connections[socketListId].addTrack(track, window.localStream))
 				})
 
 				if (id === socketId) {
 					for (let id2 in connections) {
-						if (id2 === socketId) continue
-						
-						try {
-							connections[id2].addStream(window.localStream)
-						} catch(e) {}
-			
 						connections[id2].createOffer().then((description) => {
 							connections[id2].setLocalDescription(description)
 								.then(() => {
